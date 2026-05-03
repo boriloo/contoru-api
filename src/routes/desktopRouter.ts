@@ -1,14 +1,11 @@
-import { Router } from "express"
+import { Hono } from 'hono'
 import { createDesktopController, deleteDesktopController, getDesktopByIdController, getDesktopByOwnerController, updateDesktopController } from "../controllers/desktopController"
-import multer from 'multer';
 import { isSingleDesktopOwner } from "../middlewares/desktopMiddleware";
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
 
-export const desktopRouter = Router()
+export const desktopRouter = new Hono()
 
 // CREATE DESKTOP
-desktopRouter.post("/", upload.single('backgroundImage'), createDesktopController)
+desktopRouter.post("/", createDesktopController)
 
 // GET DESKTOP BY ID
 desktopRouter.get("/:desktopId", isSingleDesktopOwner, getDesktopByIdController)
@@ -17,7 +14,7 @@ desktopRouter.get("/:desktopId", isSingleDesktopOwner, getDesktopByIdController)
 desktopRouter.get("/", getDesktopByOwnerController)
 
 // UPDATE DESKTOP 
-desktopRouter.patch("/:desktopId", upload.single('backgroundImage'), isSingleDesktopOwner, updateDesktopController)
+desktopRouter.patch("/:desktopId", isSingleDesktopOwner, updateDesktopController)
 
 // DELETE DESKTOP
 desktopRouter.delete("/:desktopId", isSingleDesktopOwner, deleteDesktopController)

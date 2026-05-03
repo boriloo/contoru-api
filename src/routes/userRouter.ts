@@ -1,18 +1,14 @@
-import { Router } from "express"
+import { Hono } from 'hono'
 import { deleteUserController, getMeController, updateUserController } from "../controllers/userController"
-import multer from 'multer';
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
 
-
-export const userRouter = Router()
+export const userRouter = new Hono()
 
 // GET ALL USER DATA
 userRouter.get("/me", getMeController)
 
 // UPDATE USER DATA
 // UPDATE DESKTOP 
-userRouter.patch("/", upload.single('profileImage'), updateUserController)
+userRouter.patch("/", updateUserController)
 
 // DELETE USER
 userRouter.delete("/", deleteUserController)

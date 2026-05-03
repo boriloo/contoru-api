@@ -1,62 +1,38 @@
-import db from "../lib/prisma";
-import { updateUserData, UserData } from "../types/user";
+import { supabase, supabaseAdmin } from "../lib/supabase"
+import { updateUserData, UserData } from "../types/user"
 
-// GET ME
+// GET ME — client normal, ok
 export const getMeService = async (id: string) => {
-    const user = await db.prisma.user.findUnique({
-        where: { id },
-    });
+    const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', id)
+        .single()
 
-    if (!user) {
-        throw new Error("User doesn't exist.");
-    }
+    if (error || !data) throw new Error("User doesn't exist.")
+    return data as UserData
+}
 
-    const { password: _, ...userWithoutPassword } = user;
-
-    return {
-        ...userWithoutPassword,
-        profileImage: user.profileImage ? Buffer.from(user.profileImage).toString('base64') : null,
-    } as unknown as UserData;
-};
-
-// UPDATE USER
+// UPDATE USER — client normal, ok
 export const updateUserService = async (id: string, data: updateUserData) => {
-    try {
-        const updated = await db.prisma.user.update({
-            where: { id },
-            data: {
-                name: data.name,
-                // Converte Buffer para Uint8Array apenas se fornecido
-                profileImage: data.profileImage ? new Uint8Array(data.profileImage) : undefined,
-            },
-        });
+    const updateData: any = {}
 
-        const { password: _, ...userWithoutPassword } = updated;
+    if (data.name) updateData.name = data.name
+    if (data.profileImage) updateData.profile_image = data.profileImage
 
-        return {
-            ...userWithoutPassword,
-            profileImage: updated.profileImage ? Buffer.from(updated.profileImage).toString('base64') : null,
-        };
-    } catch (error) {
-        throw new Error("User not found or update failed.");
-    }
-};
+    const { data: updated, error } = await supabase
+        .from('users')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single()
 
-// DELETE USER
+    if (error || !updated) throw new Error("User not found or update failed.")
+    return updated as UserData
+}
+
+// DELETE USER — precisa do admin
 export const deleteUserService = async (id: string) => {
-    try {
-        await db.prisma.file.deleteMany({
-            where: { ownerId: id },
-        })
-
-        await db.prisma.desktop.deleteMany({
-            where: { ownerId: id },
-        })
-
-        await db.prisma.user.delete({
-            where: { id },
-        });
-    } catch (error) {
-        throw new Error("User doesn't exist.");
-    }
-};
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(id)
+    if (error) throw new Error("User doesn't exist.")
+}

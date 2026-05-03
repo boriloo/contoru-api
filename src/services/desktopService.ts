@@ -1,81 +1,70 @@
-import db from "../lib/prisma";
-import { CreateDesktopData } from "../types/desktop";
+import { supabase } from "../lib/supabase"
+import { CreateDesktopData } from "../types/desktop"
 
 // CREATE DESKTOP
 export const createDesktopService = async (data: CreateDesktopData) => {
-    const desktop = await db.prisma.desktop.create({
-        data: {
+    const { data: desktop, error } = await supabase
+        .from("desktops")
+        .insert({
             name: data.name,
-            ownerId: data.ownerId,
-            backgroundImage: new Uint8Array(data.backgroundImage),
-        },
-    });
+            owner_id: data.ownerId,
+            background_image: data.backgroundImage,
+        })
+        .select()
+        .single()
 
-    return {
-        ...desktop,
-        backgroundImage: Buffer.from(desktop.backgroundImage).toString('base64'),
-    };
-};
+    if (error) throw new Error(error.message)
+    return desktop
+}
 
 // GET DESKTOP BY ID
 export const getDesktopByIdService = async (id: string) => {
-    const desktop = await db.prisma.desktop.findUnique({
-        where: { id },
-    });
+    const { data: desktop, error } = await supabase
+        .from("desktops")
+        .select("*")
+        .eq("id", id)
+        .single()
 
-    if (!desktop) {
-        throw new Error("Desktop doesn't exist.");
-    }
-
-    return {
-        ...desktop,
-        backgroundImage: Buffer.from(desktop.backgroundImage).toString('base64'),
-    };
-};
+    if (error || !desktop) throw new Error("Desktop doesn't exist.")
+    return desktop
+}
 
 // GET DESKTOPS BY OWNER ID
 export const getDesktopByOwnerService = async (ownerId: string) => {
-    const desktops = await db.prisma.desktop.findMany({
-        where: { ownerId },
-    });
+    const { data: desktops, error } = await supabase
+        .from("desktops")
+        .select("*")
+        .eq("owner_id", ownerId)
 
-    return desktops.map((desktop) => ({
-        ...desktop,
-        backgroundImage: desktop.backgroundImage ? Buffer.from(desktop.backgroundImage).toString('base64') : null,
-    }));
-};
+    if (error) throw new Error(error.message)
+    return desktops
+}
 
 // UPDATE DESKTOP
-export const updateDesktopService = async (id: string, data: { name?: string; backgroundImage?: Buffer }) => {
-    try {
-        const updated = await db.prisma.desktop.update({
-            where: { id },
-            data: {
-                name: data.name,
-                backgroundImage: data.backgroundImage ? new Uint8Array(data.backgroundImage) : undefined,
-            },
-        });
+export const updateDesktopService = async (id: string, data: { name?: string; backgroundImage?: string }) => {
+    const updateData: any = {}
 
-        return {
-            ...updated,
-            backgroundImage: updated.backgroundImage ? Buffer.from(updated.backgroundImage).toString('base64') : null,
-        };
-    } catch (error) {
-        throw new Error("Desktop not found or update failed.");
-    }
-};
+    if (data.name) updateData.name = data.name
+    if (data.backgroundImage) updateData.background_image = data.backgroundImage
+
+    const { data: updated, error } = await supabase
+        .from("desktops")
+        .update(updateData)
+        .eq("id", id)
+        .select()
+        .single()
+
+    if (error) throw new Error("Desktop not found or update failed.")
+    return updated
+}
 
 // DELETE DESKTOP
 export const deleteDesktopService = async (id: string) => {
-    try {
-        await db.prisma.file.deleteMany({
-            where: { desktopId: id }
-        })
+    // files deletam em cascata automaticamente pelo ON DELETE CASCADE
+    const { error } = await supabase
+        .from("desktops")
+        .delete()
+        .eq("id", id)
 
-        await db.prisma.desktop.delete({
-            where: { id },
-        });
-    } catch (error) {
-        throw new Error("Desktop doesn't exist.");
-    }
-};
+    if (error) throw new Error("Desktop doesn't exist.")
+}

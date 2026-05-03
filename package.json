@@ -1,20 +1,23 @@
 {
+  "name": "control-api",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "install:all": "npm install && cd client && npm install && cd ../server && npm install",
-    "copy-env": "node -e \"const fs=require('fs'); if(!fs.existsSync('./.env')) fs.copyFileSync('./.env.example', './.env')\"",
-    "docker:up": "docker-compose up -d",
-    "db:migrate": "npx dotenv-cli -- npx prisma migrate dev && npx prisma generate",
-    "db:generate": "npx prisma generate",
-    "dev:server": "cd server && npm run server",
-    "dev:client": "cd client && npm run dev",
-    "start:all": "npm run copy-env && npm run docker:up && npm run db:migrate && concurrently \"npm run dev:server\" \"npm run dev:client\""
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "test": "vitest",
+    "cf-typegen": "wrangler types"
   },
   "devDependencies": {
-    "@prisma/config": "^7.7.0",
-    "concurrently": "^9.2.1",
-    "dotenv-cli": "^11.0.0"
+    "@cloudflare/vitest-pool-workers": "^0.12.4",
+    "@types/node": "^25.6.0",
+    "typescript": "^5.5.2",
+    "vitest": "~3.2.0",
+    "wrangler": "^4.85.0"
   },
   "dependencies": {
-    "@prisma/client": "^7.7.0"
+    "@supabase/supabase-js": "^2.104.1",
+    "hono": "^4.12.15"
   }
 }

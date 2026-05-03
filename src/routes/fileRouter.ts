@@ -1,9 +1,10 @@
-import { Router } from "express"
-import { createFileController, deleteFileController, getAllFilesFromDesktopController, getFileByIdController, getFilesFromDesktopController, getFilesFromParentController, getFilesParentNamesController, updateFilePositionController } from "../controllers/fileController"
+import { Hono } from 'hono'
+import { createFileController, deleteFileController, getAllFilesFromDesktopController, 
+    getFileByIdController, getFilesFromDesktopController, getFilesFromParentController, getFilesParentNamesController, updateFilePositionController } from "../controllers/fileController"
 import { isSingleDesktopOwner } from "../middlewares/desktopMiddleware"
 import { deleteFileService } from "../services/fileService"
 
-export const fileRouter = Router()
+export const fileRouter = new Hono()
 
 // CREATE NEW FILE
 fileRouter.post("/:desktopId", isSingleDesktopOwner, createFileController)

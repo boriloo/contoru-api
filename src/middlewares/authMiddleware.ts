@@ -1,18 +1,22 @@
-import jwt from 'jsonwebtoken';
-import { NextFunction, Request, Response } from 'express';
+import { createMiddleware } from 'hono/factory'
+import { verify } from 'hono/jwt'
 
-export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization;
-    const token = authHeader?.split(' ')[1];
+export const authMiddleware = createMiddleware(async (c, next) => {
+    const authHeader = c.req.header('Authorization')
+    const token = authHeader?.split(' ')[1]
 
-    if (!token) return res.status(401).json({ error: "No token provided" });
+    if (!token) {
+        return c.json({ error: "No token provided" }, 401)
+    }
 
     try {
-        const decoded = jwt.verify(token as string, process.env.JWT_SECRET as string) as { id: string };
-        (req as any).userId = decoded.id;
+        const payload = await verify(token, c.env.JWT_SECRET, 'HS256') as { id: string }
+
+        c.set('userId' as any, payload.id)
+
         console.log('auth tudo certo')
-        next();
+        await next()
     } catch (err) {
-        return res.status(401).json({ error: "Invalid token" });
+        return c.json({ error: "Invalid token" }, 401)
     }
-}
+})
