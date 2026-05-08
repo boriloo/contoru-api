@@ -1,8 +1,8 @@
 import { Hono } from 'hono'
 import { authLoginController, authLogoutController, authRefreshController, authRegisterController } from "../controllers/authController"
-import { authMiddleware } from "../middlewares/authMiddleware"
+import { Bindings } from '../types/bindings'
 
-export const authRouter = new Hono()
+export const authRouter = new Hono<{ Bindings: Bindings }>()
 
 // AUTH REGISTER
 authRouter.post("/register", authRegisterController)

@@ -1,8 +1,9 @@
-import { supabase, supabaseAdmin } from "../lib/supabase"
+import { getSupabase, getSupabaseAdmin } from "../lib/supabase"
 import { updateUserData, UserData } from "../types/user"
 
 // GET ME — client normal, ok
-export const getMeService = async (id: string) => {
+export const getMeService = async (id: string, env: any) => {
+    const supabase = getSupabase(env)
     const { data, error } = await supabase
         .from('users')
         .select('*')
@@ -14,7 +15,9 @@ export const getMeService = async (id: string) => {
 }
 
 // UPDATE USER — client normal, ok
-export const updateUserService = async (id: string, data: updateUserData) => {
+export const updateUserService = async (id: string, data: updateUserData, env: any) => {
+
+    const supabase = getSupabase(env)
     const updateData: any = {}
 
     if (data.name) updateData.name = data.name
@@ -32,7 +35,8 @@ export const updateUserService = async (id: string, data: updateUserData) => {
 }
 
 // DELETE USER — precisa do admin
-export const deleteUserService = async (id: string) => {
+export const deleteUserService = async (id: string, env: any) => {
+    const supabaseAdmin = getSupabaseAdmin(env)
     const { error } = await supabaseAdmin.auth.admin.deleteUser(id)
     if (error) throw new Error("User doesn't exist.")
 }

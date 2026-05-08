@@ -1,11 +1,27 @@
 import { createClient } from '@supabase/supabase-js'
 
-export const supabase = createClient(
-    process.env.SUPABASE_URL as string,
-    process.env.SUPABASE_ANON_KEY as string
-)
+export const getSupabase = (env: any) =>
+    createClient(
+        env.SUPABASE_URL,
+        env.SUPABASE_ANON_KEY,
+        {
+            auth: {
+                persistSession: false,
+                autoRefreshToken: false,
+                detectSessionInUrl: false
+            }
+        }
+    )
 
-export const supabaseAdmin = createClient(
-    process.env.SUPABASE_URL as string,
-    process.env.SUPABASE_SERVICE_ROLE_KEY as string
-)
+export const getSupabaseAdmin = (env: any) =>
+    createClient(
+        env.SUPABASE_URL,
+        env.SUPABASE_SERVICE_ROLE_KEY,
+        {
+            auth: {
+                persistSession: false,
+                autoRefreshToken: false,
+                detectSessionInUrl: false
+            }
+        }
+    )

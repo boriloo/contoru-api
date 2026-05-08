@@ -1,8 +1,9 @@
-import { supabase } from "../lib/supabase";
+import { getSupabase } from "../lib/supabase";
 import { CreateFileData, FilePositionsData } from "../types/file";
 
 // CREATE FILE
-export const createFileService = async (data: CreateFileData) => {
+export const createFileService = async (data: CreateFileData, env: any) => {
+    const supabase = getSupabase(env)
     const { data: file, error } = await supabase
         .from('files')
         .insert({
@@ -23,7 +24,8 @@ export const createFileService = async (data: CreateFileData) => {
 }
 
 // GET ALL FILES FROM DESKTOP
-export const getAllFilesFromDesktopService = async (desktopId: string) => {
+export const getAllFilesFromDesktopService = async (desktopId: string, env: any) => {
+    const supabase = getSupabase(env)
     const { data, error } = await supabase
         .from('files')
         .select('*')
@@ -34,7 +36,8 @@ export const getAllFilesFromDesktopService = async (desktopId: string) => {
 }
 
 // GET ROOT FILES FROM DESKTOP
-export const getFilesFromDesktopService = async (desktopId: string) => {
+export const getFilesFromDesktopService = async (desktopId: string, env: any) => {
+    const supabase = getSupabase(env)
     const { data, error } = await supabase
         .from('files')
         .select('*')
@@ -46,7 +49,8 @@ export const getFilesFromDesktopService = async (desktopId: string) => {
 }
 
 // GET FILE BY ID
-export const getFileByIdService = async (fileId: string) => {
+export const getFileByIdService = async (fileId: string, env: any) => {
+    const supabase = getSupabase(env)
     const { data, error } = await supabase
         .from('files')
         .select('*')
@@ -58,7 +62,8 @@ export const getFileByIdService = async (fileId: string) => {
 }
 
 // GET FILES BY PARENT ID
-export const getFilesFromParentService = async (parentId: string) => {
+export const getFilesFromParentService = async (parentId: string, env: any) => {
+    const supabase = getSupabase(env)
     const { data, error } = await supabase
         .from('files')
         .select('*')
@@ -69,9 +74,10 @@ export const getFilesFromParentService = async (parentId: string) => {
 }
 
 // GET PARENT NAMES (RECURSIVE)
-export const getFilesParentNamesService = async (parentId: string) => {
-    if (parentId === 'root') return []
+export const getFilesParentNamesService = async (parentId: string, env: any) => {
 
+    if (parentId === 'root') return []
+    const supabase = getSupabase(env)
     const { data, error } = await supabase
         .rpc('get_parent_names', { start_id: parentId })
 
@@ -80,9 +86,10 @@ export const getFilesParentNamesService = async (parentId: string) => {
 }
 
 // UPDATE FILE POSITIONS
-export const updateFilePositionService = async (files: FilePositionsData[]) => {
-    if (files.length < 1) throw new Error("No files received.")
+export const updateFilePositionService = async (files: FilePositionsData[], env: any) => {
 
+    if (files.length < 1) throw new Error("No files received.")
+    const supabase = getSupabase(env)
     const { error } = await supabase
         .from('files')
         .upsert(
@@ -97,7 +104,8 @@ export const updateFilePositionService = async (files: FilePositionsData[]) => {
 }
 
 // DELETE FILE (recursivo via função SQL)
-export const deleteFileService = async (id: string) => {
+export const deleteFileService = async (id: string, env: any) => {
+    const supabase = getSupabase(env)
     const { error } = await supabase
         .rpc('delete_file_recursive', { file_id: id })
 

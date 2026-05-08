@@ -1,59 +1,68 @@
-import { Request, Response } from 'express';
-import { deleteUserService, getMeService, updateUserService } from '../services/userService';
+import { Context } from 'hono'
+import { deleteUserService, getMeService, updateUserService } from '../services/userService'
 
-
-export const getMeController = async (req: Request, res: Response) => {
+export const getMeController = async (c: Context) => {
     try {
-        const userId = (req as any).userId
+        const userId = c.get('userId') as string
+        console.log('userId', userId)
 
-        const user = await getMeService(userId as string)
+        const user = await getMeService(userId, c.env)
+        console.log('usuario', user)
 
-        res.status(201).json(user)
+        return c.json(user, 200)
     } catch (err: any) {
-        if (err.message === "User doesn't exist.")
-            res.status(400).json({ error: err.message })
-    }
-    return res.status(500).json({ error: "Server Error" });
-}
-
-export const updateUserController = async (req: Request, res: Response) => {
-    try {
-        const userId = (req as any).userId
-        console.log(req.body)
-        const { name } = req.body;
-
-        const profileImage = req.file?.buffer;
-
-        const user = await updateUserService(userId as string, { name, profileImage });
-
-        return res.status(201).json(user);
-    } catch (err: any) {
-
-        if (err.message === "No fields provided for update.") {
-            return res.status(404).json({ error: err.message })
-        }
-
-        if (err.message === "User not found.") {
-            return res.status(404).json({ error: err.message })
-        }
-
-        return res.status(500).json({ error: 'Server Error' })
-    }
-}
-
-export const deleteUserController = async (req: Request, res: Response) => {
-    try {
-        const userId = (req as any).userId
-
-        await deleteUserService(userId as string);
-
-        return res.status(204).send();
-    } catch (err: any) {
-
         if (err.message === "User doesn't exist.") {
-            return res.status(404).json({ error: err.message })
+            return c.json({ error: err.message }, 400)
+        }
+        return c.json({ error: "Server Error" }, 500)
+    }
+}
+
+export const updateUserController = async (c: Context) => {
+    try {
+        const userId = c.get('userId') as string
+
+        // Para lidar com multipart/form-data (arquivos e campos), usamos parseBody
+        const body = await c.req.parseBody()
+        const { name } = body
+
+        // No Cloudflare Workers/Hono, arquivos vêm como instâncias de File ou Blob
+        const file = body['profileImage'] as File | undefined
+        let profileImage: Buffer | undefined
+
+        if (file) {
+            const arrayBuffer = await file.arrayBuffer()
+            profileImage = Buffer.from(arrayBuffer)
         }
 
-        return res.status(500).json({ error: 'Server Error' })
+        const user = await updateUserService(userId, {
+            name: name as string,
+            profileImage
+        }, c.env) // Passando c.env caso seu service precise das chaves do Supabase
+
+        return c.json(user, 201)
+    } catch (err: any) {
+        if (err.message === "No fields provided for update." || err.message === "User not found.") {
+            return c.json({ error: err.message }, 404)
+        }
+        console.error(err)
+        return c.json({ error: 'Server Error' }, 500)
+    }
+}
+
+export const deleteUserController = async (c: Context) => {
+    try {
+        const userId = c.get('userId') as string
+
+        await deleteUserService(userId, c.env)
+
+        // No Hono, para 204 No Content, retornamos um body vazio ou null
+        return c.body(null, 204)
+    } catch (err: any) {
+        if (err.message === "User doesn't exist.") {
+            return c.json({ error: err.message }, 404)
+        }
+        console.error(err)
+        return c.json({ error: 'Server Error' }, 500)
     }
 }

@@ -1,101 +1,113 @@
-import { Request, Response } from 'express';
-import { createDesktopService, deleteDesktopService, getDesktopByIdService, getDesktopByOwnerService, updateDesktopService } from "../services/desktopService";
+import { Context } from 'hono'
+import { 
+    createDesktopService, 
+    deleteDesktopService, 
+    getDesktopByIdService, 
+    getDesktopByOwnerService, 
+    updateDesktopService 
+} from "../services/desktopService";
 import { CreateDesktopData } from "../types/desktop";
 
-export const createDesktopController = async (req: Request, res: Response) => {
+export const createDesktopController = async (c: Context) => {
     try {
-        const ownerId = (req as any).userId;
-        const { name } = req.body;
-        const backgroundImage = req.file?.buffer;
+        const ownerId = c.get('userId') as string;
+        
+        // No Hono, usamos parseBody para multipart/form-data (arquivos)
+        const body = await c.req.parseBody();
+        const { name } = body;
+        const file = body['backgroundImage'] as File | undefined;
 
-        if (!name || !ownerId || !backgroundImage) {
-            return res.status(400).json({ error: "Missing fields." });
+        if (!name || !ownerId || !file) {
+            return c.json({ error: "Missing fields." }, 400);
         }
 
-        const desktop = await createDesktopService({ name, ownerId, backgroundImage } as CreateDesktopData);
+        // Converte File para Buffer para manter compatibilidade com seu service atual
+        const arrayBuffer = await file.arrayBuffer();
+        const backgroundImage = Buffer.from(arrayBuffer);
 
-        return res.status(201).json(desktop);
+        const desktop = await createDesktopService({ 
+            name: name as string, 
+            ownerId, 
+            backgroundImage 
+        } as CreateDesktopData, c.env);
 
+        return c.json(desktop, 201);
     } catch (err: any) {
-
-        return res.status(500).json({ error: err })
+        console.error(err);
+        return c.json({ error: "Server Error" }, 500);
     }
-
 }
 
-
-export const getDesktopByIdController = async (req: Request, res: Response) => {
+export const getDesktopByIdController = async (c: Context) => {
     try {
-        const desktopId = req.params.desktopId
+        const desktopId = c.req.param('desktopId');
 
-        const desktop = await getDesktopByIdService(desktopId as string);
+        const desktop = await getDesktopByIdService(desktopId as string, c.env);
 
-        return res.status(201).json(desktop);
+        return c.json(desktop, 201);
     } catch (err: any) {
-
         if (err.message === "Desktop doesn't exist.") {
-            return res.status(404).json({ error: err.message })
+            return c.json({ error: err.message }, 404);
         }
-
-        return res.status(500).json({ error: 'Server Error' })
+        console.error(err);
+        return c.json({ error: 'Server Error' }, 500);
     }
 }
 
-
-
-export const getDesktopByOwnerController = async (req: Request, res: Response) => {
+export const getDesktopByOwnerController = async (c: Context) => {
     try {
-        const ownerId = (req as any).userId;
+        const ownerId = c.get('userId') as string;
 
-        const desktops = await getDesktopByOwnerService(ownerId);
+        const desktops = await getDesktopByOwnerService(ownerId, c.env);
 
-        return res.status(201).json(desktops);
+        return c.json(desktops, 201);
     } catch (err: any) {
-
-        return res.status(500).json({ error: 'Server Error' })
+        console.error(err);
+        return c.json({ error: 'Server Error' }, 500);
     }
 }
 
-
-export const updateDesktopController = async (req: Request, res: Response) => {
+export const updateDesktopController = async (c: Context) => {
     try {
-        const desktopId = req.params.desktopId
-        const { name } = req.body;
-        const backgroundImage = req.file?.buffer;
+        const desktopId = c.req.param('desktopId');
+        
+        const body = await c.req.parseBody();
+        const { name } = body;
+        const file = body['backgroundImage'] as File | undefined;
 
-        const desktop = await updateDesktopService(desktopId as string, { name, backgroundImage });
+        let backgroundImage: Buffer | undefined;
+        if (file instanceof File) {
+            const arrayBuffer = await file.arrayBuffer();
+            backgroundImage = Buffer.from(arrayBuffer);
+        }
 
-        return res.status(201).json(desktop);
+        const desktop = await updateDesktopService(desktopId as string, { 
+            name: name as string, 
+            backgroundImage 
+        }, c.env);
+
+        return c.json(desktop, 201);
     } catch (err: any) {
-
-        if (err.message === "No fields provided for update.") {
-            return res.status(404).json({ error: err.message })
+        if (err.message === "No fields provided for update." || err.message === "Desktop not found.") {
+            return c.json({ error: err.message }, 404);
         }
-
-        if (err.message === "Desktop not found.") {
-            return res.status(404).json({ error: err.message })
-        }
-
-        return res.status(500).json({ error: 'Server Error' })
+        console.error(err);
+        return c.json({ error: 'Server Error' }, 500);
     }
 }
 
-
-
-export const deleteDesktopController = async (req: Request, res: Response) => {
+export const deleteDesktopController = async (c: Context) => {
     try {
-        const desktopId = req.params.desktopId
+        const desktopId = c.req.param('desktopId');
 
-        await deleteDesktopService(desktopId as string);
+        await deleteDesktopService(desktopId, c.env);
 
-        return res.status(204).send();
+        return c.body(null, 204);
     } catch (err: any) {
-
         if (err.message === "Desktop doesn't exist.") {
-            return res.status(404).json({ error: err.message })
+            return c.json({ error: err.message }, 404);
         }
-
-        return res.status(500).json({ error: 'Server Error' })
+        console.error(err);
+        return c.json({ error: 'Server Error' }, 500);
     }
 }
-

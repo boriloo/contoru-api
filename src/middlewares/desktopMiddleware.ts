@@ -1,10 +1,10 @@
 import { createMiddleware } from 'hono/factory'
-import { supabase } from "../lib/supabase";
+import { getSupabase } from "../lib/supabase";
 
 export const isSingleDesktopOwner = createMiddleware(async (c, next) => {
     const userId = c.get('userId')
     const desktopId = c.req.param('desktopId')
-
+    const supabase = getSupabase(c.env)
     try {
         const { data, error } = await supabase
             .from('desktops')

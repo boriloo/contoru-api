@@ -1,8 +1,9 @@
-import { supabase } from "../lib/supabase"
+import { getSupabase } from "../lib/supabase"
 import { CreateDesktopData } from "../types/desktop"
 
 // CREATE DESKTOP
-export const createDesktopService = async (data: CreateDesktopData) => {
+export const createDesktopService = async (data: CreateDesktopData, env: any) => {
+    const supabase = getSupabase(env)
     const { data: desktop, error } = await supabase
         .from("desktops")
         .insert({
@@ -18,7 +19,8 @@ export const createDesktopService = async (data: CreateDesktopData) => {
 }
 
 // GET DESKTOP BY ID
-export const getDesktopByIdService = async (id: string) => {
+export const getDesktopByIdService = async (id: string, env: any) => {
+    const supabase = getSupabase(env)
     const { data: desktop, error } = await supabase
         .from("desktops")
         .select("*")
@@ -30,18 +32,22 @@ export const getDesktopByIdService = async (id: string) => {
 }
 
 // GET DESKTOPS BY OWNER ID
-export const getDesktopByOwnerService = async (ownerId: string) => {
+export const getDesktopByOwnerService = async (ownerId: string, env: any) => {
+    const supabase = getSupabase(env)
     const { data: desktops, error } = await supabase
         .from("desktops")
         .select("*")
         .eq("owner_id", ownerId)
+
+    console.log('DSSKTOIPS PUXADOS', desktops)
 
     if (error) throw new Error(error.message)
     return desktops
 }
 
 // UPDATE DESKTOP
-export const updateDesktopService = async (id: string, data: { name?: string; backgroundImage?: string }) => {
+export const updateDesktopService = async (id: string, data: { name?: string; backgroundImage?: string }, env: any) => {
+    const supabase = getSupabase(env)
     const updateData: any = {}
 
     if (data.name) updateData.name = data.name
@@ -59,8 +65,9 @@ export const updateDesktopService = async (id: string, data: { name?: string; ba
 }
 
 // DELETE DESKTOP
-export const deleteDesktopService = async (id: string) => {
-    // files deletam em cascata automaticamente pelo ON DELETE CASCADE
+export const deleteDesktopService = async (id: string, env: any) => {
+    const supabase = getSupabase(env)
+
     const { error } = await supabase
         .from("desktops")
         .delete()

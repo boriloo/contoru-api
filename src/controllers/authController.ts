@@ -1,100 +1,95 @@
-import { Request, Response } from 'express';
-import { authLoginService, authRefreshService, authRegisterService } from "../services/authService";
-import { LoginData, RegisterData } from "../types/auth";
+import { Context } from 'hono'
+import { getCookie, setCookie, deleteCookie } from 'hono/cookie'
+import { authLoginService, authRefreshService, authRegisterService, authLogoutService } from "../services/authService"
+import { LoginData, RegisterData } from "../types/auth"
 
-function daysInMilliseconds(num: number) {
-    return (num * 24 * 60 * 60 * 1000)
+function daysInSeconds(num: number) {
+    return num * 24 * 60 * 60
 }
 
-export const authRegisterController = async (req: Request, res: Response) => {
-
+export const authRegisterController = async (c: Context) => {
     try {
-        const { name, email, password } = req.body
+        const { name, email, password } = await c.req.json()
 
         if (!name || !email || !password) {
-            return res.status(400).json({ error: "Missing fields." });
+            return c.json({ error: "Missing fields." }, 400)
         }
 
-        const user = await authRegisterService({ name, email, password } as RegisterData);
+        const user = await authRegisterService({ name, email, password } as RegisterData, c.env)
 
-        return res.status(201).json(user);
+        return c.json(user, 201)
 
     } catch (err: any) {
-
         if (err.message === 'User already exists.') {
-            return res.status(400).json({ error: err.message })
+            return c.json({ error: err.message }, 400)
         }
-
-        console.error(err);
-        return res.status(500).json({ error: "Server Error." })
+        console.error(err)
+        return c.json({ error: "Server Error." }, 500)
     }
-
 }
 
-export const authLoginController = async (req: Request, res: Response) => {
+export const authLoginController = async (c: Context) => {
     try {
-        const { email, password, rememberMe } = req.body
-
+        const { email, password, rememberMe } = await c.req.json()
 
         if (!email || !password || typeof rememberMe !== 'boolean') {
-            return res.status(400).json({ error: "Missing fields." });
+            return c.json({ error: "Missing fields." }, 400)
         }
 
-        const user = await authLoginService({ email, password, rememberMe } as LoginData);
+        const data = await authLoginService({ email, password, rememberMe } as LoginData, c.env)
 
-        if (user.refreshToken) {
-            res.cookie('refreshCookie', user.refreshToken, {
+        if (rememberMe && data.session?.refresh_token) {
+            setCookie(c, 'refreshCookie', data.session.refresh_token, {
                 httpOnly: true,
-                secure: false,
-                sameSite: 'strict',
-                maxAge: daysInMilliseconds(30)
+                secure: true,
+                sameSite: 'Strict',
+                maxAge: daysInSeconds(30),
+                path: '/',
             })
         }
 
-        const { refreshToken: _, ...userWithoutRefresh } = user;
-        return res.status(201).json(userWithoutRefresh);
-
+        return c.json({
+            user: data.user,
+            token: data.session?.access_token,
+        }, 201)
 
     } catch (err: any) {
-
         if (err.message === 'Invalid email or password') {
-            return res.status(400).json({ error: err.message })
+            return c.json({ error: err.message }, 400)
         }
-
-        console.error(err);
-        return res.status(500).json({ error: "Server Error." })
+        console.error(err)
+        return c.json({ error: "Server Error." }, 500)
     }
-
 }
 
-
-export const authRefreshController = async (req: Request, res: Response) => {
-
-    const refreshToken = req.cookies.refreshCookie;
+export const authRefreshController = async (c: Context) => {
+    const refreshToken = getCookie(c, 'refreshCookie')
 
     if (!refreshToken) {
-        return res.status(401).json({ error: "Refresh token not found" });
+        return c.json({ error: "Refresh token not found" }, 401)
     }
 
     try {
-        const data = await authRefreshService(refreshToken);
-        return res.status(200).json(data);
+        const data = await authRefreshService(refreshToken, c.env)
+        return c.json(data, 200)
     } catch (err) {
-        return res.status(401).json({ error: "Session expired" });
+        return c.json({ error: "Session expired" }, 401)
     }
 }
 
-export const authLogoutController = async (req: Request, res: Response) => {
+export const authLogoutController = async (c: Context) => {
     try {
-        res.clearCookie('refreshCookie', {
-            httpOnly: true,
-            secure: false,
-            sameSite: 'strict',
-            path: '/',
-        });
+        await authLogoutService(c.env)
 
-        return res.status(200).json({ message: 'User logged out' })
+        deleteCookie(c, 'refreshCookie', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'Strict',
+            path: '/',
+        })
+
+        return c.json({ message: 'User logged out' }, 200)
     } catch (err) {
-        return res.status(500).json({ error: err })
+        return c.json({ error: err }, 500)
     }
 }

@@ -1,7 +1,9 @@
-import { supabase } from "../lib/supabase";
+import { getSupabase } from "../lib/supabase";
 import { LoginData, RegisterData } from "../types/auth";
 
-export const authRegisterService = async ({ name, email, password }: RegisterData) => {
+export const authRegisterService = async ({ name, email, password }: RegisterData, env: any) => {
+    const supabase = getSupabase(env)
+
     const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -14,7 +16,9 @@ export const authRegisterService = async ({ name, email, password }: RegisterDat
     return data
 }
 
-export const authLoginService = async ({ email, password }: LoginData) => {
+export const authLoginService = async ({ email, password }: LoginData, env: any) => {
+    const supabase = getSupabase(env)
+
     const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -24,7 +28,9 @@ export const authLoginService = async ({ email, password }: LoginData) => {
     return data
 }
 
-export const authRefreshService = async (refreshToken: string) => {
+export const authRefreshService = async (refreshToken: string, env: any) => {
+    const supabase = getSupabase(env)
+
     const { data, error } = await supabase.auth.refreshSession({
         refresh_token: refreshToken
     })
@@ -33,7 +39,9 @@ export const authRefreshService = async (refreshToken: string) => {
     return data
 }
 
-export const authLogoutService = async () => {
+export const authLogoutService = async (env: any) => {
+    const supabase = getSupabase(env)
+    
     const { error } = await supabase.auth.signOut()
     if (error) throw new Error(error.message)
 }

@@ -6,13 +6,7 @@ import { userRouter } from "./routes/userRouter";
 import { desktopRouter } from "./routes/desktopRouter";
 import { fileRouter } from "./routes/fileRouter";
 import { authMiddleware } from "./middlewares/authMiddleware";
-
-type Bindings = {
-    SUPABASE_URL: string
-    SUPABASE_ANON_KEY: string
-    SUPABASE_SERVICE_ROLE_KEY: string
-    JWT_SECRET: string
-}
+import { Bindings } from './types/bindings'
 
 const app = new Hono<{ Bindings: Bindings }>()
 

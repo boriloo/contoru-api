@@ -1,5 +1,5 @@
 import { createMiddleware } from 'hono/factory'
-import { verify } from 'hono/jwt'
+import { getSupabase } from '../lib/supabase' 
 
 export const authMiddleware = createMiddleware(async (c, next) => {
     const authHeader = c.req.header('Authorization')
@@ -10,13 +10,20 @@ export const authMiddleware = createMiddleware(async (c, next) => {
     }
 
     try {
-        const payload = await verify(token, c.env.JWT_SECRET, 'HS256') as { id: string }
+        const supabase = getSupabase(c.env)
+        
+       
+        const { data: { user }, error } = await supabase.auth.getUser(token)
 
-        c.set('userId' as any, payload.id)
+        if (error || !user) {
+            return c.json({ error: "Invalid or expired token" }, 401)
+        }
 
-        console.log('auth tudo certo')
+       
+        c.set('userId' as any, user.id)
+
         await next()
     } catch (err) {
-        return c.json({ error: "Invalid token" }, 401)
+        return c.json({ error: "Auth service unavailable" }, 401)
     }
 })
