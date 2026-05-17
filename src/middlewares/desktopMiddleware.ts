@@ -4,6 +4,9 @@ import { getSupabase } from "../lib/supabase";
 export const isSingleDesktopOwner = createMiddleware(async (c, next) => {
     const userId = c.get('userId')
     const desktopId = c.req.param('desktopId')
+
+    console.log('userid', userId, 'desktopId', desktopId)
+    
     const supabase = getSupabase(c.env)
     try {
         const { data, error } = await supabase

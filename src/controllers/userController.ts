@@ -3,6 +3,7 @@ import { deleteUserService, getMeService, updateUserService } from '../services/
 
 export const getMeController = async (c: Context) => {
     try {
+        console.log('GWET MEEEEEEE')
         const userId = c.get('userId') as string
         console.log('userId', userId)
 

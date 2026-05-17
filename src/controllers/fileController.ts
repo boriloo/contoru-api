@@ -1,150 +1,131 @@
-import { Request, Response } from 'express';
-import { createFileService, deleteFileService, getAllFilesFromDesktopService, getFileByIdService, getFilesFromDesktopService, getFilesFromParentService, getFilesParentNamesService, updateFilePositionService } from '../services/fileService';
-import { CreateFileBodyData, CreateFileData } from '../types/file';
+import { Context } from 'hono'
+import {
+    createFileService,
+    deleteFileService,
+    getAllFilesFromDesktopService,
+    getFileByIdService,
+    getFilesFromDesktopService,
+    getFilesFromParentService,
+    getFilesParentNamesService,
+    updateFilePositionService
+} from '../services/fileService'
+import { CreateFileBodyData, CreateFileData } from '../types/file'
 
-export const createFileController = async (req: Request, res: Response) => {
+export const createFileController = async (c: Context) => {
     try {
-        const ownerId = (req as any).userId;
-        const desktopId = req.params.desktopId
-        const data: CreateFileBodyData = req.body;
+        const ownerId = c.get('userId') as string
+        const desktopId = c.req.param('desktopId')
 
-        if (!data || !ownerId) {
-            return res.status(400).json({ error: "Missing fields." });
+        const data: CreateFileBodyData = await c.req.json()
+
+        if (!data || !ownerId || !desktopId) {
+            return c.json({ error: "Missing fields." }, 400)
         }
 
-        const fullData = {
+        const fullData: CreateFileData = {
             ...data,
-            ownerId: ownerId as string,
-            desktopId: desktopId as string
+            ownerId,
+            desktopId
         }
 
-        const file = await createFileService(fullData as CreateFileData);
-
-        return res.status(201).json(file);
+        const file = await createFileService(fullData, c.env)
+        return c.json(file, 201)
 
     } catch (err: any) {
-
-        return res.status(500).json({ error: err })
+        return c.json({ error: err.message }, 500)
     }
-
 }
 
-
-export const getAllFilesFromDesktopController = async (req: Request, res: Response) => {
+export const getAllFilesFromDesktopController = async (c: Context) => {
     try {
-        const desktopId = req.params.desktopId
-
-        const files = await getAllFilesFromDesktopService(desktopId as string);
-
-        return res.status(200).json(files);
+        const desktopId = c.req.param('desktopId')
+        const files = await getAllFilesFromDesktopService(desktopId as string, c.env)
+        return c.json(files, 200)
 
     } catch (err: any) {
-
         if (err.message === "No Files were found.") {
-            return res.status(404).json({ error: err.message })
+            return c.json({ error: err.message }, 404)
         }
-
-        return res.status(500).json({ error: 'Server Error' })
+        return c.json({ error: 'Server Error' }, 500)
     }
 }
 
-// getFileByIdService
-
-export const getFileByIdController = async (req: Request, res: Response) => {
-
+export const getFileByIdController = async (c: Context) => {
     try {
-        const fileId = req.params.fileId;
-        const files = await getFileByIdService(fileId as string);
-        return res.status(200).json(files);
+        const fileId = c.req.param('fileId')
+        const file = await getFileByIdService(fileId as string, c.env)
+        return c.json(file, 200)
+
     } catch (err: any) {
-        return res.status(500).json({ error: 'Server Error' });
+        return c.json({ error: 'Server Error' }, 500)
     }
 }
 
-
-export const getFilesFromParentController = async (req: Request, res: Response) => {
-
+export const getFilesFromParentController = async (c: Context) => {
     try {
-        const parentId = req.params.parentId;
-        const files = await getFilesFromParentService(parentId as string);
-        return res.status(200).json(files);
+        const parentId = c.req.param('parentId')
+        const files = await getFilesFromParentService(parentId as string, c.env)
+        return c.json(files, 200)
+
     } catch (err: any) {
-        return res.status(500).json({ error: 'Server Error' });
+        return c.json({ error: 'Server Error' }, 500)
     }
 }
 
-
-export const getFilesFromDesktopController = async (req: Request, res: Response) => {
+export const getFilesFromDesktopController = async (c: Context) => {
     try {
-        const desktopId = req.params.desktopId
-
-        const files = await getFilesFromDesktopService(desktopId as string);
-
-
-        return res.status(200).json(files);
+        const desktopId = c.req.param('desktopId')
+        const files = await getFilesFromDesktopService(desktopId as string, c.env)
+        return c.json(files, 200)
 
     } catch (err: any) {
-
         if (err.message === "No Files were found.") {
-            return res.status(404).json({ error: err.message })
+            return c.json({ error: err.message }, 404)
         }
-
-        return res.status(500).json({ error: 'Server Error' })
+        return c.json({ error: 'Server Error' }, 500)
     }
 }
 
-export const getFilesParentNamesController = async (req: Request, res: Response) => {
-
+export const getFilesParentNamesController = async (c: Context) => {
     try {
-        const parentId = req.params.parentId
-
-        const names = await getFilesParentNamesService(parentId as string)
-
-        return res.status(200).json(names);
+        const parentId = c.req.param('parentId')
+        const names = await getFilesParentNamesService(parentId as string, c.env)
+        return c.json(names, 200)
 
     } catch (err: any) {
-
         if (err.message === "Root files have no parents.") {
-            return res.status(404).json({ error: err.message })
+            return c.json({ error: err.message }, 404)
         }
-
-        return res.status(500).json({ error: 'Server Error' })
+        return c.json({ error: 'Server Error' }, 500)
     }
-
 }
 
-
-export const updateFilePositionController = async (req: Request, res: Response) => {
+export const updateFilePositionController = async (c: Context) => {
     try {
-        const files = req.body
+        const files = await c.req.json()
 
-        await updateFilePositionService(files);
+        await updateFilePositionService(files, c.env)
 
-        return res.status(200).json({ updated: files.length })
+        return c.json({ updated: files.length }, 200)
 
     } catch (err: any) {
-
         if (err.message === "No files received.") {
-            return res.status(404).json({ error: err.message })
+            return c.json({ error: err.message }, 404)
         }
-
-        return res.status(500).json({ error: 'Server Error' })
+        return c.json({ error: 'Server Error' }, 500)
     }
 }
 
-export const deleteFileController = async (req: Request, res: Response) => {
+export const deleteFileController = async (c: Context) => {
     try {
-        const fileId = req.params.fileId
+        const fileId = c.req.param('fileId')
+        await deleteFileService(fileId as string, c.env)
+        return c.body(null, 204)
 
-        await deleteFileService(fileId as string);
-
-        return res.status(204).send();
     } catch (err: any) {
-
         if (err.message === "File doesn't exist.") {
-            return res.status(404).json({ error: err.message })
+            return c.json({ error: err.message }, 404)
         }
-
-        return res.status(500).json({ error: 'Server Error' })
+        return c.json({ error: 'Server Error' }, 500)
     }
 }

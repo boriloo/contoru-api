@@ -8,7 +8,8 @@ export const getSupabase = (env: any) =>
             auth: {
                 persistSession: false,
                 autoRefreshToken: false,
-                detectSessionInUrl: false
+                detectSessionInUrl: false,
+                storage: undefined
             }
         }
     )
@@ -21,7 +22,8 @@ export const getSupabaseAdmin = (env: any) =>
             auth: {
                 persistSession: false,
                 autoRefreshToken: false,
-                detectSessionInUrl: false
+                detectSessionInUrl: false,
+                storage: undefined
             }
         }
     )

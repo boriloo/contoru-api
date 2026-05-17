@@ -10,6 +10,8 @@ export const createDesktopService = async (data: CreateDesktopData, env: any) =>
             name: data.name,
             owner_id: data.ownerId,
             background_image: data.backgroundImage,
+            desktop_type: data.desktopType,
+            members: data.members
         })
         .select()
         .single()

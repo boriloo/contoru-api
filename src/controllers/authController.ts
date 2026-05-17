@@ -38,15 +38,18 @@ export const authLoginController = async (c: Context) => {
 
         const data = await authLoginService({ email, password, rememberMe } as LoginData, c.env)
 
+        const isProduction = c.env.ENVIRONMENT === 'production'
+
         if (rememberMe && data.session?.refresh_token) {
             setCookie(c, 'refreshCookie', data.session.refresh_token, {
                 httpOnly: true,
-                secure: true,
-                sameSite: 'Strict',
-                maxAge: daysInSeconds(30),
+                secure: false,
+                sameSite: 'Lax', 
+                maxAge: 60 * 60 * 24 * 30,
                 path: '/',
             })
         }
+
 
         return c.json({
             user: data.user,
@@ -63,7 +66,11 @@ export const authLoginController = async (c: Context) => {
 }
 
 export const authRefreshController = async (c: Context) => {
+    const allCookies = c.req.header('cookie')
+    console.log('todos os cookies recebidos:', allCookies)
+
     const refreshToken = getCookie(c, 'refreshCookie')
+    console.log('refreshToken:', refreshToken)
 
     if (!refreshToken) {
         return c.json({ error: "Refresh token not found" }, 401)
@@ -71,8 +78,10 @@ export const authRefreshController = async (c: Context) => {
 
     try {
         const data = await authRefreshService(refreshToken, c.env)
+        console.log('refresh bem sucedido:', data)
         return c.json(data, 200)
     } catch (err) {
+        console.log('erro no refresh:', err)
         return c.json({ error: "Session expired" }, 401)
     }
 }

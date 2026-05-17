@@ -7,24 +7,24 @@ import { desktopRouter } from "./routes/desktopRouter";
 import { fileRouter } from "./routes/fileRouter";
 import { authMiddleware } from "./middlewares/authMiddleware";
 import { Bindings } from './types/bindings'
+import { storageRouter } from './routes/storageRouter';
 
 const app = new Hono<{ Bindings: Bindings }>()
 
 app.use('*', logger());
 
 app.use('*', cors({
-    origin: (origin) => {
-        const allowed = ['http://localhost:5173', 'https://seu-dominio.vercel.app']
-        return allowed.includes(origin) ? origin : allowed[0]
-    },
-    credentials: true,
-    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    origin: 'http://localhost:5173', 
+    credentials: true,               
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
-}));
+    exposeHeaders: ['Set-Cookie']  
+}))
 
 app.route("/auth", authRouter);
 app.route("/user", userRouter);
 app.route("/desktop", desktopRouter);
 app.route("/file", fileRouter);
+app.route("/storage", storageRouter);
 
 export default app;

@@ -87,20 +87,20 @@ export const getFilesParentNamesService = async (parentId: string, env: any) => 
 
 // UPDATE FILE POSITIONS
 export const updateFilePositionService = async (files: FilePositionsData[], env: any) => {
-
     if (files.length < 1) throw new Error("No files received.")
     const supabase = getSupabase(env)
-    const { error } = await supabase
-        .from('files')
-        .upsert(
-            files.map(file => ({
-                id: file.id,
-                xpos: file.xPos,
-                ypos: file.yPos,
-            }))
-        )
 
-    if (error) throw new Error("Failed to update positions.")
+    const updates = files.map(file =>
+        supabase
+            .from('files')
+            .update({ xpos: file.xPos, ypos: file.yPos })
+            .eq('id', file.id)
+    )
+
+    const results = await Promise.all(updates)
+
+    const failed = results.find(({ error }) => error)
+    if (failed?.error) throw new Error("Failed to update positions.")
 }
 
 // DELETE FILE (recursivo via função SQL)

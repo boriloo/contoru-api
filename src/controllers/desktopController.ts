@@ -1,34 +1,31 @@
 import { Context } from 'hono'
-import { 
-    createDesktopService, 
-    deleteDesktopService, 
-    getDesktopByIdService, 
-    getDesktopByOwnerService, 
-    updateDesktopService 
+import {
+    createDesktopService,
+    deleteDesktopService,
+    getDesktopByIdService,
+    getDesktopByOwnerService,
+    updateDesktopService
 } from "../services/desktopService";
 import { CreateDesktopData } from "../types/desktop";
 
 export const createDesktopController = async (c: Context) => {
     try {
         const ownerId = c.get('userId') as string;
-        
-        // No Hono, usamos parseBody para multipart/form-data (arquivos)
-        const body = await c.req.parseBody();
-        const { name } = body;
-        const file = body['backgroundImage'] as File | undefined;
 
-        if (!name || !ownerId || !file) {
+        const body = await c.req.json();
+
+        const { name, backgroundImage, desktopType, members } = body;
+
+        if (!name || !ownerId || !backgroundImage || !desktopType || !members) {
             return c.json({ error: "Missing fields." }, 400);
         }
 
-        // Converte File para Buffer para manter compatibilidade com seu service atual
-        const arrayBuffer = await file.arrayBuffer();
-        const backgroundImage = Buffer.from(arrayBuffer);
-
-        const desktop = await createDesktopService({ 
-            name: name as string, 
-            ownerId, 
-            backgroundImage 
+        const desktop = await createDesktopService({
+            name: name as string,
+            ownerId,
+            backgroundImage: backgroundImage as string,
+            desktopType: desktopType as string,
+            members: members as any
         } as CreateDesktopData, c.env);
 
         return c.json(desktop, 201);
@@ -70,7 +67,7 @@ export const getDesktopByOwnerController = async (c: Context) => {
 export const updateDesktopController = async (c: Context) => {
     try {
         const desktopId = c.req.param('desktopId');
-        
+
         const body = await c.req.parseBody();
         const { name } = body;
         const file = body['backgroundImage'] as File | undefined;
@@ -81,9 +78,9 @@ export const updateDesktopController = async (c: Context) => {
             backgroundImage = Buffer.from(arrayBuffer);
         }
 
-        const desktop = await updateDesktopService(desktopId as string, { 
-            name: name as string, 
-            backgroundImage 
+        const desktop = await updateDesktopService(desktopId as string, {
+            name: name as string,
+            backgroundImage
         }, c.env);
 
         return c.json(desktop, 201);

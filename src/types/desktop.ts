@@ -11,11 +11,15 @@ export type DesktopData = {
     name: string,
     ownerId: string,
     backgroundUrl: string,
-    createdAt: Date
+    createdAt: Date,
+    desktopType: string,
+    members: string[]
 }
 
 export type CreateDesktopData = {
     name: string,
     ownerId: string,
-    backgroundImage: Buffer,
+    backgroundImage: string,
+    desktopType: string,
+    members: string[]
 }
