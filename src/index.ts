@@ -14,11 +14,11 @@ const app = new Hono<{ Bindings: Bindings }>()
 app.use('*', logger());
 
 app.use('*', cors({
-    origin: 'http://localhost:5173', 
-    credentials: true,               
-    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    origin: 'http://localhost:5173',
+    credentials: true,
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
-    exposeHeaders: ['Set-Cookie']  
+    exposeHeaders: ['Set-Cookie']
 }))
 
 app.route("/auth", authRouter);

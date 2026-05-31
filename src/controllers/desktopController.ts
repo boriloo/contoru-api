@@ -69,18 +69,14 @@ export const updateDesktopController = async (c: Context) => {
         const desktopId = c.req.param('desktopId');
 
         const body = await c.req.parseBody();
-        const { name } = body;
-        const file = body['backgroundImage'] as File | undefined;
 
-        let backgroundImage: Buffer | undefined;
-        if (file instanceof File) {
-            const arrayBuffer = await file.arrayBuffer();
-            backgroundImage = Buffer.from(arrayBuffer);
-        }
+        const name = body['name'] as string | undefined;
+        const file = body['backgroundImage'] as string | undefined;
+
 
         const desktop = await updateDesktopService(desktopId as string, {
             name: name as string,
-            backgroundImage
+            backgroundImage: file as string
         }, c.env);
 
         return c.json(desktop, 201);
@@ -97,7 +93,7 @@ export const deleteDesktopController = async (c: Context) => {
     try {
         const desktopId = c.req.param('desktopId');
 
-        await deleteDesktopService(desktopId, c.env);
+        await deleteDesktopService(desktopId as string, c.env);
 
         return c.body(null, 204);
     } catch (err: any) {

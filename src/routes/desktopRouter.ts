@@ -5,19 +5,17 @@ import { authMiddleware } from '../middlewares/authMiddleware';
 
 export const desktopRouter = new Hono()
 
-desktopRouter.use('*', authMiddleware)
-
 // CREATE DESKTOP
-desktopRouter.post("/", createDesktopController)
+desktopRouter.post("/", authMiddleware, createDesktopController)
 
 // GET DESKTOP BY ID
-desktopRouter.get("/:desktopId", isSingleDesktopOwner, getDesktopByIdController)
+desktopRouter.get("/:desktopId", authMiddleware, isSingleDesktopOwner, getDesktopByIdController)
 
 // GET DESKTOP BY OWNER
-desktopRouter.get("/", getDesktopByOwnerController)
+desktopRouter.get("/", authMiddleware, getDesktopByOwnerController)
 
 // UPDATE DESKTOP 
-desktopRouter.patch("/:desktopId", isSingleDesktopOwner, updateDesktopController)
+desktopRouter.patch("/:desktopId", authMiddleware, isSingleDesktopOwner, updateDesktopController)
 
 // DELETE DESKTOP
-desktopRouter.delete("/:desktopId", isSingleDesktopOwner, deleteDesktopController)
+desktopRouter.delete("/:desktopId", authMiddleware, isSingleDesktopOwner, deleteDesktopController)

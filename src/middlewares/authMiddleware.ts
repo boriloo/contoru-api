@@ -3,8 +3,6 @@ import { getSupabase } from '../lib/supabase'
 import { createClient } from '@supabase/supabase-js'
 
 export const authMiddleware = createMiddleware(async (c, next) => {
-
-    console.log('AUTH MIDLEWARE!!!')
     const authHeader = c.req.header('Authorization')
     const token = authHeader?.split(' ')[1]
 

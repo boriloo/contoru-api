@@ -28,10 +28,12 @@
 		{
 			"binding": "STORAGE",
 			"bucket_name": "control-storage",
-			"preview_bucket_name": "control-storage"
+			"preview_bucket_name": "control-storage",
+			"remote": true
 		}
 	],
 	"upload_source_maps": true
+	
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
