@@ -14,7 +14,10 @@ const app = new Hono<{ Bindings: Bindings }>()
 app.use('*', logger());
 
 app.use('*', cors({
-    origin: 'http://localhost:5173',
+    origin: [
+        'http://localhost:5173',
+        'http://localhost:4173'
+    ],
     credentials: true,
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
