@@ -43,8 +43,8 @@ export const authLoginController = async (c: Context) => {
         if (rememberMe && data.session?.refresh_token) {
             setCookie(c, 'refreshCookie', data.session.refresh_token, {
                 httpOnly: true,
-                secure: false,
-                sameSite: 'Lax',
+                secure: true, // Obrigatório quando SameSite é None
+                sameSite: 'None', // Permite o uso em domínios diferentes
                 maxAge: 60 * 60 * 24 * 30,
                 path: '/',
             })
@@ -92,8 +92,8 @@ export const authLogoutController = async (c: Context) => {
 
         deleteCookie(c, 'refreshCookie', {
             httpOnly: true,
-            secure: false,
-            sameSite: 'Lax',
+            secure: true,
+            sameSite: 'None',
             path: '/',
         })
 
