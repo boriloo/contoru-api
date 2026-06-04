@@ -13,19 +13,24 @@ const app = new Hono<{ Bindings: Bindings }>()
 
 app.use('*', logger());
 
-app.use('*', cors({
-    origin: [
-        'http://localhost:5173',
-        'http://localhost:4173',
-        'https://project-cr2dn.vercel.app'
-    ],
+const corsOptions = {
+    origin: (origin: string) => {
+        const allowed = [
+            'http://localhost:5173',
+            'http://localhost:4173',
+            'https://project-cr2dn.vercel.app'
+        ]
+        return allowed.includes(origin) ? origin : null
+    },
     credentials: true,
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
     exposeHeaders: ['Set-Cookie']
-}))
+}
 
-app.get('/ping', (c) => c.json({ ok: true, version: '2' }))
+app.options('*', cors(corsOptions))
+app.use('*', cors(corsOptions))
+
 
 app.route("/auth", authRouter);
 app.route("/user", userRouter);
