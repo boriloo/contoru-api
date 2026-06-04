@@ -14,8 +14,8 @@ const app = new Hono<{ Bindings: Bindings }>()
 app.use('*', logger());
 
 const corsOptions = {
-    // 1. Especifique as origens permitidas (sem '*')
     origin: (origin) => {
+        if (!origin) return 'http://localhost:5173';
         const allowedOrigins = [
             'http://localhost:5173',
             'http://localhost:4173',
@@ -23,14 +23,13 @@ const corsOptions = {
         ];
         return allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
     },
-    // 2. Mude credentials para true
     credentials: true,
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
+    // Adicione os headers que o frontend está tentando enviar
+    allowHeaders: ['Content-Type', 'Authorization', 'Cache-Control', 'Pragma'],
     exposeHeaders: ['Set-Cookie']
 }
 
-app.options('*', cors(corsOptions))
 app.use('*', cors(corsOptions))
 
 app.use('*', async (c, next) => {
