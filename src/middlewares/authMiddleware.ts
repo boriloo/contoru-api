@@ -6,7 +6,9 @@ export const authMiddleware = createMiddleware(async (c, next) => {
     const authHeader = c.req.header('Authorization')
     const token = authHeader?.split(' ')[1]
 
-    if (!token) return c.json({ error: "No token provided" }, 401)
+    if (!token) return c.json({ error: "No token provided" }, 401, {
+        'Cache-Control': 'no-store'
+    })
 
     try {
 
