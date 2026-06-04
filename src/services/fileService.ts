@@ -106,8 +106,18 @@ export const updateFilePositionService = async (files: FilePositionsData[], env:
 // DELETE FILE (recursivo via função SQL)
 export const deleteFileService = async (id: string, env: any) => {
     const supabase = getSupabase(env)
-    const { error } = await supabase
-        .rpc('delete_file_recursive', { file_id: id })
 
-    if (error) throw new Error("File doesn't exist.")
+    const { data: toDelete } = await supabase.rpc('get_all_children_ids', {
+        start_id: id
+    })
+
+    await supabase.rpc('delete_file_recursive', { file_id: id })
+
+    if (toDelete && toDelete.length > 0) {
+        await Promise.all(
+            toDelete.map((fileId: string) =>
+                env.STORAGE.delete(`files/${fileId}.png`)
+            )
+        )
+    }
 }

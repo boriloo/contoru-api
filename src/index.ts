@@ -16,7 +16,8 @@ app.use('*', logger());
 app.use('*', cors({
     origin: [
         'http://localhost:5173',
-        'http://localhost:4173'
+        'http://localhost:4173',
+        'https://project-cr2dn.vercel.app'
     ],
     credentials: true,
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
