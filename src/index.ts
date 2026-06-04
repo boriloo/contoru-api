@@ -14,8 +14,17 @@ const app = new Hono<{ Bindings: Bindings }>()
 app.use('*', logger());
 
 const corsOptions = {
-    origin: '*',  // temporário para testar
-    credentials: false, // com * não pode usar credentials: true
+    // 1. Especifique as origens permitidas (sem '*')
+    origin: (origin) => {
+        const allowedOrigins = [
+            'http://localhost:5173',
+            'http://localhost:4173',
+            'https://project-cr2dn.vercel.app'
+        ];
+        return allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+    },
+    // 2. Mude credentials para true
+    credentials: true,
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
     exposeHeaders: ['Set-Cookie']
