@@ -25,6 +25,8 @@ app.use('*', cors({
     exposeHeaders: ['Set-Cookie']
 }))
 
+app.get('/ping', (c) => c.json({ ok: true, version: '2' }))
+
 app.route("/auth", authRouter);
 app.route("/user", userRouter);
 app.route("/desktop", desktopRouter);
