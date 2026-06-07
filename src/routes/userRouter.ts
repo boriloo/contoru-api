@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { deleteUserController, getMeController, updateUserController } from "../controllers/userController"
+import { deleteUserController, getMeController, getUserEmailController, updateUserController } from "../controllers/userController"
 import { authMiddleware } from '../middlewares/authMiddleware'
 
 export const userRouter = new Hono()
