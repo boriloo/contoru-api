@@ -5,7 +5,6 @@ import { authRouter } from "./routes/authRouter";
 import { userRouter } from "./routes/userRouter";
 import { desktopRouter } from "./routes/desktopRouter";
 import { fileRouter } from "./routes/fileRouter";
-import { authMiddleware } from "./middlewares/authMiddleware";
 import { Bindings } from './types/bindings'
 import { storageRouter } from './routes/storageRouter';
 import { relationRouter } from './routes/relationRouter';
