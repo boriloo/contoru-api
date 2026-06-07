@@ -14,6 +14,17 @@ export const getMeService = async (id: string, env: any) => {
     return data as UserData
 }
 
+export const getUserEmailService = async (id: string, env: any) => {
+    const supabase = getSupabase(env)
+    const { data, error } = await supabase
+        .from('users')
+        .select('email')
+        .eq('id', id)
+        .single()
+    if (error || !data) throw new Error("User doesn't exist.")
+    return data.email;
+}
+
 // UPDATE USER — client normal, ok
 export const updateUserService = async (id: string, data: updateUserData, env: any) => {
 

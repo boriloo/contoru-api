@@ -1,16 +1,28 @@
 import { Context } from 'hono'
-import { deleteUserService, getMeService, updateUserService } from '../services/userService'
+import { deleteUserService, getMeService, getUserEmailService, updateUserService } from '../services/userService'
 
 export const getMeController = async (c: Context) => {
     try {
-        console.log('GWET MEEEEEEE')
         const userId = c.get('userId') as string
-        console.log('userId', userId)
 
         const user = await getMeService(userId, c.env)
-        console.log('usuario', user)
 
         return c.json(user, 200)
+    } catch (err: any) {
+        if (err.message === "User doesn't exist.") {
+            return c.json({ error: err.message }, 400)
+        }
+        return c.json({ error: "Server Error" }, 500)
+    }
+}
+
+export const getUserEmailController = async (c: Context) => {
+    try {
+        const userId = c.get('userId') as string
+
+        const email = await getUserEmailService(userId, c.env)
+
+        return c.json(email, 200)
     } catch (err: any) {
         if (err.message === "User doesn't exist.") {
             return c.json({ error: err.message }, 400)
@@ -50,6 +62,8 @@ export const updateUserController = async (c: Context) => {
         return c.json({ error: 'Server Error' }, 500)
     }
 }
+
+
 
 export const deleteUserController = async (c: Context) => {
     try {

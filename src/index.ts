@@ -8,6 +8,7 @@ import { fileRouter } from "./routes/fileRouter";
 import { authMiddleware } from "./middlewares/authMiddleware";
 import { Bindings } from './types/bindings'
 import { storageRouter } from './routes/storageRouter';
+import { relationRouter } from './routes/relationRouter';
 
 const app = new Hono<{ Bindings: Bindings }>()
 
@@ -41,6 +42,7 @@ app.route("/auth", authRouter);
 app.route("/user", userRouter);
 app.route("/desktop", desktopRouter);
 app.route("/file", fileRouter);
+app.route("/relation", relationRouter);
 app.route("/storage", storageRouter);
 
 export default app;
