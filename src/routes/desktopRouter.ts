@@ -2,20 +2,41 @@ import { Hono } from 'hono'
 import { createDesktopController, deleteDesktopController, getDesktopByIdController, getDesktopByOwnerController, updateDesktopController } from "../controllers/desktopController"
 import { isSingleDesktopOwner } from "../middlewares/desktopMiddleware";
 import { authMiddleware } from '../middlewares/authMiddleware';
+import { rateLimit } from '../middlewares/rateLimitMiddleware'; // Adicionado
 
 export const desktopRouter = new Hono()
 
 // CREATE DESKTOP
-desktopRouter.post("/", authMiddleware, createDesktopController)
+desktopRouter.post("/", authMiddleware, rateLimit({
+    limit: 5,
+    window: 60,
+    keyPrefix: 'desktop-create'
+}), createDesktopController)
 
 // GET DESKTOP BY ID
-desktopRouter.get("/:desktopId", authMiddleware, isSingleDesktopOwner, getDesktopByIdController)
+desktopRouter.get("/:desktopId", authMiddleware, isSingleDesktopOwner, rateLimit({
+    limit: 60,
+    window: 60,
+    keyPrefix: 'desktop-get-id'
+}), getDesktopByIdController)
 
 // GET DESKTOP BY OWNER
-desktopRouter.get("/", authMiddleware, getDesktopByOwnerController)
+desktopRouter.get("/", authMiddleware, rateLimit({
+    limit: 60,
+    window: 60,
+    keyPrefix: 'desktop-get-owner'
+}), getDesktopByOwnerController)
 
-// UPDATE DESKTOP 
-desktopRouter.patch("/:desktopId", authMiddleware, isSingleDesktopOwner, updateDesktopController)
+// UPDATE DESKTOP
+desktopRouter.patch("/:desktopId", authMiddleware, isSingleDesktopOwner, rateLimit({
+    limit: 30,
+    window: 60,
+    keyPrefix: 'desktop-update'
+}), updateDesktopController)
 
 // DELETE DESKTOP
-desktopRouter.delete("/:desktopId", authMiddleware, isSingleDesktopOwner, deleteDesktopController)
+desktopRouter.delete("/:desktopId", authMiddleware, isSingleDesktopOwner, rateLimit({
+    limit: 5,
+    window: 60,
+    keyPrefix: 'desktop-delete'
+}), deleteDesktopController)
