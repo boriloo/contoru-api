@@ -1,5 +1,5 @@
 import { Context } from 'hono'
-import { deleteUserService, getMeService, getUserEmailService, updateUserService } from '../services/userService'
+import { deleteUserService, getMeService, getUserByEmailService, updateUserService } from '../services/userService'
 
 export const getMeController = async (c: Context) => {
     try {
@@ -16,13 +16,13 @@ export const getMeController = async (c: Context) => {
     }
 }
 
-export const getUserEmailController = async (c: Context) => {
+export const getUserByEmailController = async (c: Context) => {
     try {
-        const userId = c.get('userId') as string
+        const userEmail = c.req.param('userEmail');
 
-        const email = await getUserEmailService(userId, c.env)
+        const user = await getUserByEmailService(userEmail as string, c.env)
 
-        return c.json(email, 200)
+        return c.json(user, 200)
     } catch (err: any) {
         if (err.message === "User doesn't exist.") {
             return c.json({ error: err.message }, 400)

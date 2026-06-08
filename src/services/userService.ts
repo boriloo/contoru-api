@@ -14,12 +14,12 @@ export const getMeService = async (id: string, env: any) => {
     return data as UserData
 }
 
-export const getUserEmailService = async (id: string, env: any) => {
+export const getUserByEmailService = async (userEmail: string, env: any) => {
     const supabase = getSupabase(env)
     const { data, error } = await supabase
         .from('users')
         .select('email')
-        .eq('id', id)
+        .eq('email', userEmail)
         .single()
     if (error || !data) throw new Error("User doesn't exist.")
     return data.email;

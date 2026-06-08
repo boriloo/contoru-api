@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { deleteUserController, getMeController, getUserEmailController, updateUserController } from "../controllers/userController"
+import { deleteUserController, getMeController, getUserByEmailController, updateUserController } from "../controllers/userController"
 import { authMiddleware } from '../middlewares/authMiddleware'
 import { rateLimit } from '../middlewares/rateLimitMiddleware'
 
@@ -14,11 +14,12 @@ userRouter.get("/me", rateLimit({
     keyPrefix: 'user-me'
 }), getMeController)
 
-userRouter.get("/email", rateLimit({
-    limit: 60,
+//GET USER BY EMAIL
+userRouter.get("/email/:userEmail", rateLimit({
+    limit: 10,
     window: 60,
-    keyPrefix: 'user-email'
-}), getUserEmailController)
+    keyPrefix: 'user-by-email'
+}), getUserByEmailController)
 
 // UPDATE USER DATA
 userRouter.patch("/", rateLimit({
