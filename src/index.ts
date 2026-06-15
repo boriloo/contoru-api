@@ -31,11 +31,6 @@ const corsOptions = {
 
 app.use('*', cors(corsOptions))
 
-app.use('*', async (c, next) => {
-    console.log('Origin recebido:', c.req.header('origin'))
-    await next()
-})
-
 app.route("/auth", authRouter);
 app.route("/user", userRouter);
 app.route("/desktop", desktopRouter);

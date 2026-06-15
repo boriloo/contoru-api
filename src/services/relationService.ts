@@ -9,6 +9,7 @@ export const createRelationService = async (senderId: string, receiverId: string
         .insert({
             sender_id: senderId,
             receiver_id: receiverId,
+            blocker_id: null,
             status: 'pending',
         })
         .select()
@@ -24,7 +25,7 @@ export const getAcceptedRelationsService = async (userId: string, env: any) => {
 
     const { data: relations, error } = await supabase
         .from('relations')
-        .select()
+        .select('*')
         .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
         .eq('status', 'accepted')
 
@@ -32,14 +33,13 @@ export const getAcceptedRelationsService = async (userId: string, env: any) => {
     return relations
 }
 
-// GET PENDING RELATIONS
 export const getPendingRelationsService = async (userId: string, env: any) => {
     const supabase = getSupabase(env)
 
     const { data: relations, error } = await supabase
         .from('relations')
-        .select()
-        .eq('receiver_id', userId)
+        .select('*')
+        .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
         .eq('status', 'pending')
 
     if (error) throw new Error('Failed to fetch pending relations.')
@@ -52,7 +52,7 @@ export const getBlockedRelationsService = async (userId: string, env: any) => {
 
     const { data: relations, error } = await supabase
         .from('relations')
-        .select()
+        .select('*')
         .eq('blocker_id', userId)
         .eq('status', 'blocked')
 

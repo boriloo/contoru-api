@@ -7,7 +7,7 @@ export const authRouter = new Hono<{ Bindings: Bindings }>()
 
 // AUTH REGISTER
 authRouter.post("/register", rateLimit({
-    limit: 5,
+    limit: 50,
     window: 3600, 
     keyPrefix: 'auth-register'
 }), authRegisterController)

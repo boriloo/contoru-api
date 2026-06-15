@@ -13,6 +13,8 @@ export const createRelationController = async (c: Context) => {
         const senderId = c.get('userId') as string
         const receiverId = c.req.param('receiverId')
 
+        if (senderId === receiverId) return c.json({ error: 'Same person' }, 500)
+
         const relation = await createRelationService(senderId, receiverId as string, c.env)
 
         return c.json(relation, 201)

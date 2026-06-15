@@ -12,6 +12,7 @@ export const authRegisterService = async ({ name, email, password }: RegisterDat
         }
     })
 
+
     if (error) throw new Error(error.message)
     return data
 }
@@ -41,7 +42,7 @@ export const authRefreshService = async (refreshToken: string, env: any) => {
 
 export const authLogoutService = async (env: any) => {
     const supabase = getSupabase(env)
-    
+
     const { error } = await supabase.auth.signOut()
     if (error) throw new Error(error.message)
 }
