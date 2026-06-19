@@ -7,6 +7,8 @@ import {
     getPendingRelationsController,
     getBlockedRelationsController,
     deleteRelationController,
+    acceptRelationController, // Importe o controller de aceitar
+    blockRelationController   // Importe o controller de bloquear
 } from '../controllers/relationController'
 import { rateLimit } from '../middlewares/rateLimitMiddleware'
 
@@ -39,6 +41,20 @@ relationRouter.get('/blocked', rateLimit({
     window: 60,
     keyPrefix: 'relations-blocked'
 }), authMiddleware, getBlockedRelationsController)
+
+// ACCEPT RELATION
+relationRouter.put('/accept/:relationId', rateLimit({
+    limit: 10,
+    window: 60,
+    keyPrefix: 'relation-accept'
+}), authMiddleware, acceptRelationController)
+
+// BLOCK RELATION
+relationRouter.put('/block/:relationId', rateLimit({
+    limit: 10,
+    window: 60,
+    keyPrefix: 'relation-block'
+}), authMiddleware, blockRelationController)
 
 // DELETE RELATION 
 relationRouter.delete('/', rateLimit({

@@ -80,3 +80,60 @@ export const deleteRelationService = async (userId: string, relationId: string, 
 
     if (error) throw new Error('Failed to delete relation.')
 }
+
+// ACCEPT RELATION
+export const acceptRelationService = async (userId: string, relationId: string, env: any) => {
+    const supabase = getSupabase(env)
+
+    const { data: relation, error: fetchError } = await supabase
+        .from('relations')
+        .select('*')
+        .eq('id', relationId)
+        .single()
+
+    if (fetchError || !relation) throw new Error('Relation not found.')
+
+    if (relation.receiver_id !== userId) {
+        throw new Error('Only the receiver can accept this relation.')
+    }
+
+    const { data: updatedRelation, error: updateError } = await supabase
+        .from('relations')
+        .update({ status: 'accepted' })
+        .eq('id', relationId)
+        .select()
+        .single()
+
+    if (updateError) throw new Error('Failed to accept relation.')
+    return updatedRelation
+}
+
+// BLOCK RELATION
+export const blockRelationService = async (userId: string, relationId: string, env: any) => {
+    const supabase = getSupabase(env)
+
+    const { data: relation, error: fetchError } = await supabase
+        .from('relations')
+        .select('*')
+        .eq('id', relationId)
+        .single()
+
+    if (fetchError || !relation) throw new Error('Relation not found.')
+
+    if (relation.sender_id !== userId && relation.receiver_id !== userId) {
+        throw new Error('Access denied.')
+    }
+
+    const { data: updatedRelation, error: updateError } = await supabase
+        .from('relations')
+        .update({
+            status: 'blocked',
+            blocker_id: userId
+        })
+        .eq('id', relationId)
+        .select()
+        .single()
+
+    if (updateError) throw new Error('Failed to block relation.')
+    return updatedRelation
+}
