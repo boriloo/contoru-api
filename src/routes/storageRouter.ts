@@ -14,7 +14,7 @@ storageRouter.post('/upload', authMiddleware, rateLimit({
 }), uploadStorageController)
 
 // PROXY
-storageRouter.get('/proxy/:key{.*}', rateLimit({
+storageRouter.get('/proxy/:key{.*}', authMiddleware, rateLimit({
     limit: 30,
     window: 60,
     keyPrefix: 'storage-proxy'

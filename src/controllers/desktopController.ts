@@ -68,15 +68,15 @@ export const updateDesktopController = async (c: Context) => {
     try {
         const desktopId = c.req.param('desktopId');
 
-        const body = await c.req.parseBody();
+        const body = await c.req.json();
 
-        const name = body['name'] as string | undefined;
-        const file = body['backgroundImage'] as string | undefined;
+        const { name, backgroundImage, desktopType } = body;
 
 
         const desktop = await updateDesktopService(desktopId as string, {
             name: name as string,
-            backgroundImage: file as string
+            backgroundImage: backgroundImage as string,
+            desktopType: desktopType as string
         }, c.env);
 
         return c.json(desktop, 201);

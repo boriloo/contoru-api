@@ -48,12 +48,13 @@ export const getDesktopByOwnerService = async (ownerId: string, env: any) => {
 }
 
 // UPDATE DESKTOP
-export const updateDesktopService = async (id: string, data: { name?: string; backgroundImage?: string }, env: any) => {
+export const updateDesktopService = async (id: string, data: { name?: string; backgroundImage?: string, desktopType?: string }, env: any) => {
     const supabase = getSupabase(env)
     const updateData: any = {}
 
     if (data.name) updateData.name = data.name
     if (data.backgroundImage) updateData.background_image = data.backgroundImage
+    if (data.desktopType) updateData.desktop_type = data.desktopType
 
     const { data: updated, error } = await supabase
         .from("desktops")
