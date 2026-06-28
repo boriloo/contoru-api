@@ -12,8 +12,19 @@ export const authRegisterService = async ({ name, email, password }: RegisterDat
         }
     })
 
+    if (error) {
+        if (error.message.toLowerCase().includes('already registered') ||
+            error.message.toLowerCase().includes('already exists')) {
+            throw new Error('User already exists.')
+        }
+        throw new Error(error.message)
+    }
 
-    if (error) throw new Error(error.message)
+
+    if (data.user && data.user.identities && data.user.identities.length === 0) {
+        throw new Error('User already exists.')
+    }
+
     return data
 }
 

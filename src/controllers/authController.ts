@@ -50,14 +50,13 @@ export const authLoginController = async (c: Context) => {
             })
         }
 
-
         return c.json({
             user: data.user,
             token: data.session?.access_token,
         }, 201)
 
     } catch (err: any) {
-        if (err.message === 'Invalid email or password') {
+        if (err.message === 'Invalid email or password.') {
             return c.json({ error: err.message }, 400)
         }
         console.error(err)
