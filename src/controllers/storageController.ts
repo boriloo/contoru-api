@@ -1,5 +1,5 @@
 import { Context } from "hono"
-import { uploadToStorageService } from "../services/storageService"
+import { deleteFromStorageService, uploadToStorageService } from "../services/storageService"
 
 export const getStorageController = async (c: Context) => {
     const key = c.req.param('key')
@@ -86,5 +86,23 @@ export const uploadStorageController = async (c: Context) => {
     } catch (err: any) {
         console.error(err)
         return c.json({ error: 'Upload failed.' }, 500)
+    }
+}
+
+export const deleteStorageController = async (c: Context) => {
+    try {
+        const key = c.req.param('key')
+
+        if (!key) return c.json({ error: 'No key provided' }, 400)
+
+        const exists = await c.env.STORAGE.get(key)
+        if (!exists) return c.json({ error: 'File not found' }, 404)
+
+        await deleteFromStorageService(key, c.env)
+
+        return c.body(null, 204)
+    } catch (err) {
+        console.error(err)
+        return c.json({ error: 'Delete failed.' }, 500)
     }
 }

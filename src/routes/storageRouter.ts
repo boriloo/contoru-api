@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { Bindings } from '../types/bindings'
-import { getFileProxyController, getStorageController, uploadStorageController } from '../controllers/storageController'
+import { deleteStorageController, getFileProxyController, getStorageController, uploadStorageController } from '../controllers/storageController'
 import { authMiddleware } from '../middlewares/authMiddleware'
 import { rateLimit } from '../middlewares/rateLimitMiddleware' // Adicionado import
 
@@ -26,3 +26,5 @@ storageRouter.get('/:key{.+}', rateLimit({
     window: 60,
     keyPrefix: 'storage-get'
 }), getStorageController)
+
+storageRouter.delete('/:key{.+}', authMiddleware, deleteStorageController)
