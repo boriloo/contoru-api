@@ -7,6 +7,7 @@ import {
     updateDesktopService
 } from "../services/desktopService";
 import { CreateDesktopData } from "../types/desktop";
+import { deleteFromStorageService } from '../services/storageService';
 
 export const createDesktopController = async (c: Context) => {
     try {
@@ -94,6 +95,7 @@ export const deleteDesktopController = async (c: Context) => {
         const desktopId = c.req.param('desktopId');
 
         await deleteDesktopService(desktopId as string, c.env);
+        await deleteFromStorageService(`desktops/${desktopId}`, c.env);
 
         return c.body(null, 204);
     } catch (err: any) {
