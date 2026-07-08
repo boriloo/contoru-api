@@ -29,6 +29,9 @@ export const createDtInviteController = async (c: Context) => {
 export const getPendingDtInvitesController = async (c: Context) => {
     try {
         const userId = c.get('userId') as string
+
+
+
         const invites = await getPendingDtInvitesService(userId, c.env)
         return c.json(invites, 200)
 

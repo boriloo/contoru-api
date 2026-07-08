@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { createDesktopController, deleteDesktopController, getDesktopByIdController, getDesktopByOwnerController, updateDesktopController } from "../controllers/desktopController"
+import { createDesktopController, deleteDesktopController, getDesktopByIdController, getDesktopByOwnerController, getSafeDesktopByIdController, updateDesktopController } from "../controllers/desktopController"
 import { isSingleDesktopOwner } from "../middlewares/desktopMiddleware";
 import { authMiddleware } from '../middlewares/authMiddleware';
 import { rateLimit } from '../middlewares/rateLimitMiddleware'; // Adicionado
@@ -13,6 +13,37 @@ desktopRouter.post("/", authMiddleware, rateLimit({
     window: 60,
     keyPrefix: 'desktop-create'
 }), createDesktopController)
+
+// CREATE NEW DESKTOP INVITE
+desktopRouter.post('/invite/:desktopId/:receiverId', rateLimit({
+    limit: 5, window: 60, keyPrefix: 'invite-create'
+}), authMiddleware, createDtInviteController)
+
+// GET MY PENDING INVITES
+desktopRouter.get('/invite', rateLimit({
+    limit: 10, window: 60, keyPrefix: 'invite-get'
+}), authMiddleware, getPendingDtInvitesController)
+
+// GET DESKTOP PENDING INVITES
+desktopRouter.get('/invite/:desktopId', rateLimit({
+    limit: 10, window: 60, keyPrefix: 'invite-get-desktop'
+}), authMiddleware, getPendingDtInvitesFromDesktopController)
+
+//
+desktopRouter.put('/accept/:inviteId', rateLimit({
+    limit: 10, window: 60, keyPrefix: 'invite-accept'
+}), authMiddleware, acceptDtInviteController)
+
+desktopRouter.delete('/invite/:inviteId', rateLimit({
+    limit: 15, window: 60, keyPrefix: 'invite-delete'
+}), authMiddleware, deleteDtInviteController)
+
+// GET SAFE DESKTOP BY ID
+desktopRouter.get("/safe/:desktopId", authMiddleware, rateLimit({
+    limit: 60,
+    window: 60,
+    keyPrefix: 'desktop-get-safe-id'
+}), getSafeDesktopByIdController)
 
 // GET DESKTOP BY ID
 desktopRouter.get("/:desktopId", authMiddleware, isSingleDesktopOwner, rateLimit({
@@ -42,26 +73,3 @@ desktopRouter.delete("/:desktopId", authMiddleware, isSingleDesktopOwner, rateLi
     keyPrefix: 'desktop-delete'
 }), deleteDesktopController)
 
-// CREATE NEW DESKTOP INVITE
-desktopRouter.post('/invite/:desktopId/:receiverId', rateLimit({
-    limit: 5, window: 60, keyPrefix: 'invite-create'
-}), authMiddleware, createDtInviteController)
-
-// GET MY PENDING INVITES
-desktopRouter.get('/invite', rateLimit({
-    limit: 10, window: 60, keyPrefix: 'invite-get'
-}), authMiddleware, getPendingDtInvitesController)
-
-// GET DESKTOP PENDING INVITES
-desktopRouter.get('/invite/:desktopId', rateLimit({
-    limit: 10, window: 60, keyPrefix: 'invite-get'
-}), authMiddleware, getPendingDtInvitesFromDesktopController)
-
-//
-desktopRouter.put('/accept/:inviteId', rateLimit({
-    limit: 10, window: 60, keyPrefix: 'invite-accept'
-}), authMiddleware, acceptDtInviteController)
-
-desktopRouter.delete('/invite/:inviteId', rateLimit({
-    limit: 15, window: 60, keyPrefix: 'invite-delete'
-}), authMiddleware, deleteDtInviteController)

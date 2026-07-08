@@ -4,6 +4,7 @@ import {
     deleteDesktopService,
     getDesktopByIdService,
     getDesktopByOwnerService,
+    getSafeDesktopByIdService,
     updateDesktopService
 } from "../services/desktopService";
 import { CreateDesktopData } from "../types/desktop";
@@ -33,6 +34,22 @@ export const createDesktopController = async (c: Context) => {
     } catch (err: any) {
         console.error(err);
         return c.json({ error: "Server Error" }, 500);
+    }
+}
+
+export const getSafeDesktopByIdController = async (c: Context) => {
+    try {
+        const desktopId = c.req.param('desktopId');
+
+        const desktop = await getSafeDesktopByIdService(desktopId as string, c.env);
+
+        return c.json(desktop, 201);
+    } catch (err: any) {
+        if (err.message === "Desktop doesn't exist.") {
+            return c.json({ error: err.message }, 404);
+        }
+        console.error(err);
+        return c.json({ error: 'Server Error' }, 500);
     }
 }
 

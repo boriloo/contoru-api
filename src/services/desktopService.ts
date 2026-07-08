@@ -20,6 +20,19 @@ export const createDesktopService = async (data: CreateDesktopData, env: any) =>
     return desktop
 }
 
+// GET SAFE DESKTOP BY ID
+export const getSafeDesktopByIdService = async (id: string, env: any) => {
+    const supabase = getSupabase(env)
+    const { data: desktop, error } = await supabase
+        .from("desktops")
+        .select("id, name")
+        .eq("id", id)
+        .single()
+
+    if (error || !desktop) throw new Error("Desktop doesn't exist.")
+    return desktop
+}
+
 // GET DESKTOP BY ID
 export const getDesktopByIdService = async (id: string, env: any) => {
     const supabase = getSupabase(env)

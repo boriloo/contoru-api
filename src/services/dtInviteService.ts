@@ -4,6 +4,15 @@ import { getSupabase } from "../lib/supabase"
 export const createDtInviteService = async (desktopId: string, receiverId: string, env: any) => {
     const supabase = getSupabase(env)
 
+    const { data: existing } = await supabase
+        .from('dt_invites')
+        .select('id')
+        .eq('desktop_id', desktopId)
+        .eq('receiver_id', receiverId)
+        .single()
+
+    if (existing) throw new Error("Invite already exists.")
+
     const { data, error } = await supabase
         .from('dt_invites')
         .insert({
@@ -81,6 +90,7 @@ export const acceptDtInviteService = async (inviteId: string, userId: string, en
 }
 
 export const deleteDtInviteService = async (inviteId: string, env: any) => {
+
     const supabase = getSupabase(env)
 
     const { error } = await supabase
