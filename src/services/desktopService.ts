@@ -46,6 +46,30 @@ export const getDesktopByIdService = async (id: string, env: any) => {
     return desktop
 }
 
+// MEMBERSHIP
+export const getDesktopByMembershipService = async (userId: string, env: any) => {
+    const supabase = getSupabase(env)
+
+    const { data: memberships, error: memberError } = await supabase
+        .from('dt_members')
+        .select('desktop_id')
+        .eq('user_id', userId)
+
+    if (memberError) throw new Error(memberError.message)
+    if (!memberships || memberships.length === 0) return []
+
+    const desktopIds = memberships.map((m: any) => m.desktop_id)
+
+    const { data: desktops, error: desktopError } = await supabase
+        .from('desktops')
+        .select('*')
+        .in('id', desktopIds)
+        .neq('owner_id', userId)
+
+    if (desktopError) throw new Error(desktopError.message)
+    return desktops
+}
+
 // GET DESKTOPS BY OWNER ID
 export const getDesktopByOwnerService = async (ownerId: string, env: any) => {
     const supabase = getSupabase(env)
@@ -90,4 +114,21 @@ export const deleteDesktopService = async (id: string, env: any) => {
         .eq("id", id)
 
     if (error) throw new Error("Desktop doesn't exist.")
+}
+
+export const getMembersFromDesktopService = async (desktopId: string, env: any) => {
+    const supabase = getSupabase(env)
+
+    const { data, error } = await supabase
+        .from('dt_members')
+        .select(`
+            id,
+            role,
+            joined_at,
+            user:users!user_id(id, name, email, profile_image)
+        `)
+        .eq('desktop_id', desktopId)
+
+    if (error) throw new Error(error.message)
+    return data
 }

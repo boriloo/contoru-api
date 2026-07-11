@@ -3,7 +3,9 @@ import {
     createDesktopService,
     deleteDesktopService,
     getDesktopByIdService,
+    getDesktopByMembershipService,
     getDesktopByOwnerService,
+    getMembersFromDesktopService,
     getSafeDesktopByIdService,
     updateDesktopService
 } from "../services/desktopService";
@@ -69,6 +71,17 @@ export const getDesktopByIdController = async (c: Context) => {
     }
 }
 
+export const getDesktopByMembershipController = async (c: Context) => {
+    try {
+        const userId = c.get('userId') as string
+        const desktops = await getDesktopByMembershipService(userId, c.env)
+        return c.json(desktops, 200)
+    } catch (err: any) {
+        console.error(err)
+        return c.json({ error: 'Server Error' }, 500)
+    }
+}
+
 export const getDesktopByOwnerController = async (c: Context) => {
     try {
         const ownerId = c.get('userId') as string;
@@ -121,5 +134,16 @@ export const deleteDesktopController = async (c: Context) => {
         }
         console.error(err);
         return c.json({ error: 'Server Error' }, 500);
+    }
+}
+
+export const getMembersFromDesktopController = async (c: Context) => {
+    try {
+        const desktopId = c.req.param('desktopId')
+        const members = await getMembersFromDesktopService(desktopId as string, c.env)
+        return c.json(members, 200)
+    } catch (err: any) {
+        console.error(err)
+        return c.json({ error: 'Server Error' }, 500)
     }
 }

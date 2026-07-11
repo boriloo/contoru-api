@@ -62,22 +62,15 @@ export const acceptDtInviteService = async (inviteId: string, userId: string, en
 
     if (inviteError || !invite) throw new Error("Invite not found.")
 
-    const { data: desktop, error: desktopError } = await supabase
-        .from('desktops')
-        .select('members')
-        .eq('id', invite.desktop_id)
-        .single()
+    const { error: memberError } = await supabase
+        .from('dt_members')
+        .insert({
+            desktop_id: invite.desktop_id,
+            user_id: userId,
+            role: 'member'
+        })
 
-    if (desktopError || !desktop) throw new Error("Desktop not found.")
-
-    const updatedMembers = [...(desktop.members || []), userId]
-
-    const { error: updateError } = await supabase
-        .from('desktops')
-        .update({ members: updatedMembers })
-        .eq('id', invite.desktop_id)
-
-    if (updateError) throw new Error("Failed to update desktop members.")
+    if (memberError) throw new Error("Failed to add member.")
 
     const { error: deleteError } = await supabase
         .from('dt_invites')
