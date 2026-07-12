@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { createDesktopController, deleteDesktopController, getDesktopByIdController, getDesktopByMembershipController, getDesktopByOwnerController, getMembersFromDesktopController, getSafeDesktopByIdController, updateDesktopController } from "../controllers/desktopController"
-import { isSingleDesktopOwner } from "../middlewares/desktopMiddleware";
+import { isSingleDesktopMember, isSingleDesktopOwner } from "../middlewares/desktopMiddleware";
 import { authMiddleware } from '../middlewares/authMiddleware';
 import { rateLimit } from '../middlewares/rateLimitMiddleware';
 import { acceptDtInviteController, createDtInviteController, deleteDtInviteController, getPendingDtInvitesController, getPendingDtInvitesFromDesktopController } from '../controllers/dtInviteController';
@@ -64,7 +64,7 @@ desktopRouter.get("/owner", authMiddleware, rateLimit({
 }), getDesktopByOwnerController)
 
 // GET DESKTOP BY ID — chamado ao abrir configurações
-desktopRouter.get("/:desktopId", authMiddleware, isSingleDesktopOwner, rateLimit({
+desktopRouter.get("/:desktopId", authMiddleware, isSingleDesktopMember, rateLimit({
     limit: 60,
     window: 60,
     keyPrefix: 'desktop-get-id'

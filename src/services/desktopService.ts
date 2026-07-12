@@ -11,12 +11,12 @@ export const createDesktopService = async (data: CreateDesktopData, env: any) =>
             owner_id: data.ownerId,
             background_image: data.backgroundImage,
             desktop_type: data.desktopType,
-            members: data.members
         })
         .select()
         .single()
 
     if (error) throw new Error(error.message)
+
     return desktop
 }
 
@@ -64,7 +64,6 @@ export const getDesktopByMembershipService = async (userId: string, env: any) =>
         .from('desktops')
         .select('*')
         .in('id', desktopIds)
-        .neq('owner_id', userId)
 
     if (desktopError) throw new Error(desktopError.message)
     return desktops

@@ -6,7 +6,7 @@ export const isSingleDesktopOwner = createMiddleware(async (c, next) => {
     const desktopId = c.req.param('desktopId')
 
     console.log('userid', userId, 'desktopId', desktopId)
-    
+
     const supabase = getSupabase(c.env)
     try {
         const { data, error } = await supabase
@@ -18,6 +18,31 @@ export const isSingleDesktopOwner = createMiddleware(async (c, next) => {
 
         if (error || !data) {
             return c.json({ error: 'User is not desktop owner' }, 403)
+        }
+
+        await next()
+    } catch {
+        return c.json({ error: 'Server Error.' }, 500)
+    }
+})
+
+export const isSingleDesktopMember = createMiddleware(async (c, next) => {
+    const userId = c.get('userId')
+    const desktopId = c.req.param('desktopId')
+
+    console.log('userid', userId, 'desktopId', desktopId)
+
+    const supabase = getSupabase(c.env)
+    try {
+        const { data, error } = await supabase
+            .from('dt_members')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('desktop_id', desktopId)
+            .single()
+
+        if (error || !data) {
+            return c.json({ error: 'User is not desktop member' }, 403)
         }
 
         await next()
