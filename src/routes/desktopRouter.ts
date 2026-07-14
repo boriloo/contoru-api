@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { createDesktopController, deleteDesktopController, getDesktopByIdController, getDesktopByMembershipController, getDesktopByOwnerController, getMembersFromDesktopController, getSafeDesktopByIdController, updateDesktopController } from "../controllers/desktopController"
+import { createDesktopController, deleteDesktopController, getDesktopByIdController, getDesktopByMembershipController, getDesktopByOwnerController, getMembersFromDesktopController, getSafeDesktopByIdController, leaveDesktopController, removeMemberFromDesktopController, updateDesktopController } from "../controllers/desktopController"
 import { isSingleDesktopMember, isSingleDesktopOwner } from "../middlewares/desktopMiddleware";
 import { authMiddleware } from '../middlewares/authMiddleware';
 import { rateLimit } from '../middlewares/rateLimitMiddleware';
@@ -96,3 +96,17 @@ desktopRouter.delete("/:desktopId", authMiddleware, isSingleDesktopOwner, rateLi
     window: 3600,
     keyPrefix: 'desktop-delete'
 }), deleteDesktopController)
+
+// REMOVE MEMBER — só o dono pode remover membros
+desktopRouter.delete('/members/:desktopId/:userId', authMiddleware, isSingleDesktopOwner, rateLimit({
+    limit: 20,
+    window: 3600,
+    keyPrefix: 'desktop-remove-member'
+}), removeMemberFromDesktopController)
+
+// LEAVE DESKTOP — membro sai voluntariamente
+desktopRouter.delete('/leave/:desktopId', authMiddleware, rateLimit({
+    limit: 10,
+    window: 3600,
+    keyPrefix: 'desktop-leave'
+}), leaveDesktopController)

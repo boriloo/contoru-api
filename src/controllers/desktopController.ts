@@ -7,6 +7,8 @@ import {
     getDesktopByOwnerService,
     getMembersFromDesktopService,
     getSafeDesktopByIdService,
+    leaveDesktopService,
+    removeMemberFromDesktopService,
     updateDesktopService
 } from "../services/desktopService";
 import { CreateDesktopData } from "../types/desktop";
@@ -143,6 +145,43 @@ export const getMembersFromDesktopController = async (c: Context) => {
         const members = await getMembersFromDesktopService(desktopId as string, c.env)
         return c.json(members, 200)
     } catch (err: any) {
+        console.error(err)
+        return c.json({ error: 'Server Error' }, 500)
+    }
+}
+
+// no desktopController.ts
+
+export const removeMemberFromDesktopController = async (c: Context) => {
+    try {
+        const desktopId = c.req.param('desktopId')
+        const userId = c.req.param('userId')
+
+        await removeMemberFromDesktopService(desktopId as string, userId as string, c.env)
+        return c.body(null, 204)
+    } catch (err: any) {
+        if (err.message === "Failed to remove member.") {
+            return c.json({ error: err.message }, 404)
+        }
+        console.error(err)
+        return c.json({ error: 'Server Error' }, 500)
+    }
+}
+
+export const leaveDesktopController = async (c: Context) => {
+    try {
+        const desktopId = c.req.param('desktopId')
+        const userId = c.get('userId') as string
+
+        await leaveDesktopService(desktopId as string, userId, c.env)
+        return c.body(null, 204)
+    } catch (err: any) {
+        if (err.message === "Owner cannot leave the desktop.") {
+            return c.json({ error: err.message }, 403)
+        }
+        if (err.message === "Desktop not found.") {
+            return c.json({ error: err.message }, 404)
+        }
         console.error(err)
         return c.json({ error: 'Server Error' }, 500)
     }

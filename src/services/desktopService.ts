@@ -77,8 +77,6 @@ export const getDesktopByOwnerService = async (ownerId: string, env: any) => {
         .select("*")
         .eq("owner_id", ownerId)
 
-    console.log('DSSKTOIPS PUXADOS', desktops)
-
     if (error) throw new Error(error.message)
     return desktops
 }
@@ -130,4 +128,40 @@ export const getMembersFromDesktopService = async (desktopId: string, env: any) 
 
     if (error) throw new Error(error.message)
     return data
+}
+
+// no desktopService.ts
+
+export const removeMemberFromDesktopService = async (desktopId: string, userId: string, env: any) => {
+    const supabase = getSupabase(env)
+
+    const { error } = await supabase
+        .from('dt_members')
+        .delete()
+        .eq('desktop_id', desktopId)
+        .eq('user_id', userId)
+
+    if (error) throw new Error("Failed to remove member.")
+}
+
+export const leaveDesktopService = async (desktopId: string, userId: string, env: any) => {
+    const supabase = getSupabase(env)
+
+    // verifica se não é o dono — dono não pode sair, só deletar
+    const { data: desktop, error: desktopError } = await supabase
+        .from('desktops')
+        .select('owner_id')
+        .eq('id', desktopId)
+        .single()
+
+    if (desktopError || !desktop) throw new Error("Desktop not found.")
+    if (desktop.owner_id === userId) throw new Error("Owner cannot leave the desktop.")
+
+    const { error } = await supabase
+        .from('dt_members')
+        .delete()
+        .eq('desktop_id', desktopId)
+        .eq('user_id', userId)
+
+    if (error) throw new Error("Failed to leave desktop.")
 }
