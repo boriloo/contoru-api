@@ -15,7 +15,7 @@ desktopRouter.post("/", authMiddleware, rateLimit({
 }), createDesktopController)
 
 // CREATE INVITE — pode convidar vários amigos seguidos
-desktopRouter.post('/invite/:desktopId/:receiverId', authMiddleware, rateLimit({
+desktopRouter.post('/invite/:desktopId/:receiverId', authMiddleware, isSingleDesktopOwner, rateLimit({
     limit: 20,
     window: 3600,
     keyPrefix: 'invite-create'
@@ -70,7 +70,7 @@ desktopRouter.get("/:desktopId", authMiddleware, isSingleDesktopMember, rateLimi
     keyPrefix: 'desktop-get-id'
 }), getDesktopByIdController)
 
-desktopRouter.get('/members/:desktopId', authMiddleware, rateLimit({
+desktopRouter.get('/members/:desktopId', authMiddleware, isSingleDesktopMember, rateLimit({
     limit: 60,
     window: 60,
     keyPrefix: 'desktop-get-members'

@@ -6,11 +6,11 @@ export type UserData = {
     name: string;
     email: string;
     password: string;
-    profileImage: Buffer | string;
+    profileImage: string;
     createdAt: Date;
 }
 
 export type updateUserData = {
     name?: string,
-    profileImage?: Buffer,
+    profileImage?: string,
 }

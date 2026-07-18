@@ -27,4 +27,5 @@ storageRouter.get('/:key{.+}', rateLimit({
     keyPrefix: 'storage-get'
 }), getStorageController)
 
+// DELETE
 storageRouter.delete('/:key{.+}', authMiddleware, deleteStorageController)

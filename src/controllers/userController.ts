@@ -50,23 +50,13 @@ export const updateUserController = async (c: Context) => {
     try {
         const userId = c.get('userId') as string
 
-        // Para lidar com multipart/form-data (arquivos e campos), usamos parseBody
-        const body = await c.req.parseBody()
-        const { name } = body
-
-        // No Cloudflare Workers/Hono, arquivos vêm como instâncias de File ou Blob
-        const file = body['profileImage'] as File | undefined
-        let profileImage: Buffer | undefined
-
-        if (file) {
-            const arrayBuffer = await file.arrayBuffer()
-            profileImage = Buffer.from(arrayBuffer)
-        }
+        const body = await c.req.json()
+        const { name, profileImage } = body
 
         const user = await updateUserService(userId, {
             name: name as string,
-            profileImage
-        }, c.env) // Passando c.env caso seu service precise das chaves do Supabase
+            profileImage: profileImage as string | undefined
+        }, c.env)
 
         return c.json(user, 201)
     } catch (err: any) {
