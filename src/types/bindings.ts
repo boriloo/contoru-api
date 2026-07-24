@@ -4,4 +4,5 @@ export type Bindings = {
     SUPABASE_SERVICE_ROLE_KEY: string
     ENVIRONMENT: string
     STORAGE: R2Bucket
+    FRONTEND_URL: string
 }

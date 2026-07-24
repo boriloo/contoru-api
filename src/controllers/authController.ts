@@ -1,6 +1,6 @@
 import { Context } from 'hono'
 import { getCookie, setCookie, deleteCookie } from 'hono/cookie'
-import { authLoginService, authRefreshService, authRegisterService, authLogoutService } from "../services/authService"
+import { authLoginService, authRefreshService, authRegisterService, authLogoutService, authGoogleUrlService } from "../services/authService"
 import { LoginData, RegisterData } from "../types/auth"
 
 function daysInSeconds(num: number) {
@@ -99,5 +99,35 @@ export const authLogoutController = async (c: Context) => {
         return c.json({ message: 'User logged out' }, 200)
     } catch (err) {
         return c.json({ error: err }, 500)
+    }
+}
+
+export const authGoogleUrlController = async (c: Context) => {
+    try {
+        const url = await authGoogleUrlService(c.env)
+        return c.json({ url }, 200)
+    } catch (err) {
+        console.error(err)
+        return c.json({ error: 'Server Error' }, 500)
+    }
+}
+
+export const setRefreshController = async (c: Context) => {
+    try {
+        const { refreshToken } = await c.req.json()
+        if (!refreshToken) return c.json({ error: 'Missing token' }, 400)
+
+        setCookie(c, 'refreshCookie', refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'None',
+            maxAge: 60 * 60 * 24 * 30,
+            path: '/',
+        })
+
+        return c.json({ ok: true }, 200)
+    } catch (err) {
+        console.error(err)
+        return c.json({ error: 'Server Error' }, 500)
     }
 }

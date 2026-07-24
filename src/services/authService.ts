@@ -57,3 +57,8 @@ export const authLogoutService = async (env: any) => {
     const { error } = await supabase.auth.signOut()
     if (error) throw new Error(error.message)
 }
+
+export const authGoogleUrlService = async (env: any) => {
+    const redirectTo = encodeURIComponent(`${env.FRONTEND_URL}/auth/callback`)
+    return `${env.SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${redirectTo}`
+}

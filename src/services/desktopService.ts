@@ -87,8 +87,15 @@ export const updateDesktopService = async (id: string, data: { name?: string; ba
     const updateData: any = {}
 
     if (data.name) updateData.name = data.name
-    if (data.backgroundImage) updateData.background_image = data.backgroundImage
     if (data.desktopType) updateData.desktop_type = data.desktopType
+
+    if (data.backgroundImage) {
+        updateData.background_image = data.backgroundImage
+
+        if (!data.backgroundImage.startsWith('desktops/')) {
+            await env.STORAGE.delete(`desktops/${id}`)
+        }
+    }
 
     const { data: updated, error } = await supabase
         .from("desktops")
@@ -111,6 +118,8 @@ export const deleteDesktopService = async (id: string, env: any) => {
         .eq("id", id)
 
     if (error) throw new Error("Desktop doesn't exist.")
+
+    await env.STORAGE.delete(`desktops/${id}`)
 }
 
 export const getMembersFromDesktopService = async (desktopId: string, env: any) => {
