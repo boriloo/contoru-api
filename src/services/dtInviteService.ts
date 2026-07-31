@@ -4,6 +4,15 @@ import { getSupabase } from "../lib/supabase"
 export const createDtInviteService = async (desktopId: string, receiverId: string, env: any) => {
     const supabase = getSupabase(env)
 
+    const { data: desktop, error: desktopError } = await supabase
+        .from('desktops')
+        .select('desktop_type')
+        .eq('id', desktopId)
+        .single()
+
+    if (desktopError || !desktop) throw new Error("Desktop not found.")
+    if (desktop.desktop_type === 'personal') throw new Error("Cannot invite to a personal desktop.")
+
     const { data: existing } = await supabase
         .from('dt_invites')
         .select('id')
@@ -25,6 +34,7 @@ export const createDtInviteService = async (desktopId: string, receiverId: strin
     if (error) throw new Error("Failed to create invite.")
     return data
 }
+
 
 export const getPendingDtInvitesService = async (userId: string, env: any) => {
     const supabase = getSupabase(env)
@@ -61,6 +71,15 @@ export const acceptDtInviteService = async (inviteId: string, userId: string, en
         .single()
 
     if (inviteError || !invite) throw new Error("Invite not found.")
+
+    const { data: desktop, error: desktopError } = await supabase
+        .from('desktops')
+        .select('desktop_type')
+        .eq('id', invite.desktop_id)
+        .single()
+
+    if (desktopError || !desktop) throw new Error("Desktop not found.")
+    if (desktop.desktop_type === 'personal') throw new Error("Cannot join a personal desktop.")
 
     const { error: memberError } = await supabase
         .from('dt_members')

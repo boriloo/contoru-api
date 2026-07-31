@@ -114,11 +114,14 @@ export const updateDesktopController = async (c: Context) => {
 
         return c.json(desktop, 201);
     } catch (err: any) {
-        if (err.message === "No fields provided for update." || err.message === "Desktop not found.") {
-            return c.json({ error: err.message }, 404);
+        if (err.message === "Cannot change to personal desktop while there are members.") {
+            return c.json({ error: err.message }, 400)
         }
-        console.error(err);
-        return c.json({ error: 'Server Error' }, 500);
+        if (err.message === "No fields provided for update." || err.message === "Desktop not found.") {
+            return c.json({ error: err.message }, 404)
+        }
+        console.error(err)
+        return c.json({ error: 'Server Error' }, 500)
     }
 }
 

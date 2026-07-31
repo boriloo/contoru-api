@@ -87,14 +87,24 @@ export const updateDesktopService = async (id: string, data: { name?: string; ba
     const updateData: any = {}
 
     if (data.name) updateData.name = data.name
-    if (data.desktopType) updateData.desktop_type = data.desktopType
+    if (data.backgroundImage) updateData.background_image = data.backgroundImage
 
-    if (data.backgroundImage) {
-        updateData.background_image = data.backgroundImage
+    if (data.desktopType) {
 
-        if (!data.backgroundImage.startsWith('desktops/')) {
-            await env.STORAGE.delete(`desktops/${id}`)
+        if (data.desktopType === 'personal') {
+            const { data: members, error: membersError } = await supabase
+                .from('dt_members')
+                .select('id')
+                .eq('desktop_id', id)
+
+            if (membersError) throw new Error("Failed to check members.")
+
+            if (members && members.length > 1) {
+                throw new Error("Cannot change to personal desktop while there are members.")
+            }
         }
+
+        updateData.desktop_type = data.desktopType
     }
 
     const { data: updated, error } = await supabase

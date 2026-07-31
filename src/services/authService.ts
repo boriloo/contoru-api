@@ -62,3 +62,27 @@ export const authGoogleUrlService = async (env: any) => {
     const redirectTo = encodeURIComponent(`${env.FRONTEND_URL}/auth/callback`)
     return `${env.SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${redirectTo}`
 }
+
+export const authForgotPasswordService = async (email: string, env: any) => {
+    const supabase = getSupabase(env)
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${env.FRONTEND_URL}/auth/reset-password`
+    })
+
+    if (error) throw new Error(error.message)
+}
+
+export const authResetPasswordService = async (accessToken: string, newPassword: string, env: any) => {
+    const supabase = getSupabase(env)
+
+    const { error: userError } = await supabase.auth.getUser(accessToken)
+    if (userError) throw new Error("Invalid or expired token.")
+
+    const { error } = await supabase.auth.admin.updateUserById(
+        (await supabase.auth.getUser(accessToken)).data.user!.id,
+        { password: newPassword }
+    )
+
+    if (error) throw new Error("Failed to reset password.")
+}

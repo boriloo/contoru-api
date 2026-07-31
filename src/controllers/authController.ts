@@ -1,6 +1,6 @@
 import { Context } from 'hono'
 import { getCookie, setCookie, deleteCookie } from 'hono/cookie'
-import { authLoginService, authRefreshService, authRegisterService, authLogoutService, authGoogleUrlService } from "../services/authService"
+import { authLoginService, authRefreshService, authRegisterService, authLogoutService, authGoogleUrlService, authForgotPasswordService, authResetPasswordService } from "../services/authService"
 import { LoginData, RegisterData } from "../types/auth"
 
 function daysInSeconds(num: number) {
@@ -129,5 +129,34 @@ export const setRefreshController = async (c: Context) => {
     } catch (err) {
         console.error(err)
         return c.json({ error: 'Server Error' }, 500)
+    }
+}
+
+export const authForgotPasswordController = async (c: Context) => {
+    try {
+        const { email } = await c.req.json()
+        if (!email) return c.json({ error: "Missing email." }, 400)
+
+        await authForgotPasswordService(email, c.env)
+        return c.json({ message: "Password reset email sent." }, 200)
+    } catch (err: any) {
+        console.error(err)
+        return c.json({ error: "Server Error." }, 500)
+    }
+}
+
+export const authResetPasswordController = async (c: Context) => {
+    try {
+        const { accessToken, newPassword } = await c.req.json()
+        if (!accessToken || !newPassword) return c.json({ error: "Missing fields." }, 400)
+
+        await authResetPasswordService(accessToken, newPassword, c.env)
+        return c.json({ message: "Password reset successfully." }, 200)
+    } catch (err: any) {
+        if (err.message === "Invalid or expired token.") {
+            return c.json({ error: err.message }, 401)
+        }
+        console.error(err)
+        return c.json({ error: "Server Error." }, 500)
     }
 }

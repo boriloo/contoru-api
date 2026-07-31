@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { authGoogleUrlController, authLoginController, authLogoutController, authRefreshController, authRegisterController, setRefreshController } from "../controllers/authController"
+import { authForgotPasswordController, authGoogleUrlController, authLoginController, authLogoutController, authRefreshController, authRegisterController, authResetPasswordController, setRefreshController } from "../controllers/authController"
 import { Bindings } from '../types/bindings'
 import { rateLimit } from '../middlewares/rateLimitMiddleware'
 
@@ -44,3 +44,15 @@ authRouter.post("/set-refresh", rateLimit({
     window: 60,
     keyPrefix: 'auth-set-refresh'
 }), setRefreshController)
+
+authRouter.post("/forgot-password", rateLimit({
+    limit: 3,
+    window: 3600,
+    keyPrefix: 'auth-forgot-password'
+}), authForgotPasswordController)
+
+authRouter.post("/reset-password", rateLimit({
+    limit: 5,
+    window: 3600,
+    keyPrefix: 'auth-reset-password'
+}), authResetPasswordController)
