@@ -4,6 +4,16 @@ import { CreateDesktopData } from "../types/desktop"
 // CREATE DESKTOP
 export const createDesktopService = async (data: CreateDesktopData, env: any) => {
     const supabase = getSupabase(env)
+
+    // Verifica a quantidade atual de desktops do usuário
+    const { count, error: countError } = await supabase
+        .from("desktops")
+        .select('*', { count: 'exact', head: true })
+        .eq("owner_id", data.ownerId)
+
+    if (countError) throw new Error(countError.message)
+    if (count !== null && count >= 5) throw new Error("Limit of 5 desktops has been reached.")
+
     const { data: desktop, error } = await supabase
         .from("desktops")
         .insert({

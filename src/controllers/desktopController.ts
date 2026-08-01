@@ -36,6 +36,9 @@ export const createDesktopController = async (c: Context) => {
 
         return c.json(desktop, 201);
     } catch (err: any) {
+        if (err.message === "Limit of 5 desktops has been reached.") {
+            return c.json({ error: err.message }, 403);
+        }
         console.error(err);
         return c.json({ error: "Server Error" }, 500);
     }

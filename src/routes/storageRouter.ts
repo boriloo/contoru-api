@@ -15,14 +15,14 @@ storageRouter.post('/upload', authMiddleware, rateLimit({
 
 // PROXY
 storageRouter.get('/proxy/:key{.*}', authMiddleware, rateLimit({
-    limit: 30,
+    limit: 50,
     window: 60,
     keyPrefix: 'storage-proxy'
 }), getFileProxyController)
 
 // GET
 storageRouter.get('/:key{.+}', rateLimit({
-    limit: 30,
+    limit: 50,
     window: 60,
     keyPrefix: 'storage-get'
 }), getStorageController)
