@@ -32,6 +32,9 @@ export const createFileController = async (c: Context) => {
         return c.json(file, 201)
 
     } catch (err: any) {
+        if (err.message.includes("Missing information")) {
+            return c.json({ error: err.message }, 400)
+        }
         if (err.message === "Limit of 500 files per desktop has been reached.") {
             return c.json({ error: err.message }, 403)
         }

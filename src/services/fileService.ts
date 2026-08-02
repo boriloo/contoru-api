@@ -11,7 +11,11 @@ export const createFileService = async (data: CreateFileData, env: any) => {
         .eq('desktop_id', data.desktopId)
 
     if (countError) throw new Error(countError.message)
-    if (count !== null && count >= 10) throw new Error("Limit of 500 files per desktop has been reached.")
+        
+    if (count !== null && count >= 500) throw new Error("Limit of 500 files per desktop has been reached.")
+
+    if (!data.name?.trim()) throw new Error("Missing information: Name is required.")
+    if (data.fileType === 'link' && !data.url?.trim()) throw new Error("Missing information: URL is required.")
 
     const { data: file, error } = await supabase
         .from('files')
