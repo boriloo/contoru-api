@@ -4,6 +4,15 @@ import { CreateFileData, FilePositionsData } from "../types/file";
 // CREATE FILE
 export const createFileService = async (data: CreateFileData, env: any) => {
     const supabase = getSupabase(env)
+
+    const { count, error: countError } = await supabase
+        .from('files')
+        .select('*', { count: 'exact', head: true })
+        .eq('desktop_id', data.desktopId)
+
+    if (countError) throw new Error(countError.message)
+    if (count !== null && count >= 10) throw new Error("Limit of 500 files per desktop has been reached.")
+
     const { data: file, error } = await supabase
         .from('files')
         .insert({
