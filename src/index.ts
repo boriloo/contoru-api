@@ -19,7 +19,7 @@ const corsOptions = {
         const allowedOrigins = [
             'http://localhost:5173',
             'http://localhost:4173',
-            'https://project-cr2dn.vercel.app'
+            'https://contoru.vercel.app'
         ];
         return allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
     },
